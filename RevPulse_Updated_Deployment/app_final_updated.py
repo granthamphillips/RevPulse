@@ -2672,6 +2672,11 @@ summary_placeholder = st.container()
 # INPUTS
 # ============================================================
 
+st.markdown(
+    '<div class="section-label">Property profile</div>',
+    unsafe_allow_html=True,
+)
+
 with st.expander(
     "Market and property",
     expanded=False,
@@ -2821,11 +2826,6 @@ amenity_checks: dict[str, bool] = {}
 st.markdown(
     '<div class="section-label">Amenities</div>',
     unsafe_allow_html=True,
-)
-
-st.caption(
-    "Amenities are grouped exactly as they were during model training. "
-    "Property Readiness amenities are selected by default."
 )
 
 amenity_columns = st.columns(3, gap="medium")
