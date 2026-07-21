@@ -163,7 +163,7 @@ st.markdown(
             color: inherit;
             border: 1px solid rgba(47, 158, 98, .72);
             border-radius: 12px;
-            margin-top: 1rem;
+            margin-top: 1.3rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
         }
 
@@ -1350,6 +1350,29 @@ def build_comparable_map(
         zoom_start=11,
         tiles="CartoDB positron",
         control_scale=True,
+    )
+
+    # Give the neutral Carto basemap a subtle RevPulse-green cast while
+    # leaving markers, labels, popups, and controls at their normal colors.
+    comparable_map.get_root().header.add_child(
+        folium.Element(
+            """
+            <style>
+                .leaflet-container {
+                    background: #e8f1e6;
+                }
+
+                .leaflet-tile-pane {
+                    filter:
+                        sepia(18%)
+                        saturate(125%)
+                        hue-rotate(62deg)
+                        brightness(1.03)
+                        contrast(.94);
+                }
+            </style>
+            """
+        )
     )
 
     for _, listing in comparable_rows.iterrows():
@@ -2791,177 +2814,170 @@ with st.expander(
 
 amenity_checks: dict[str, bool] = {}
 
-with st.expander(
-    "Amenities",
-    expanded=False,
+st.markdown(
+    '<div class="section-label">Amenities</div>',
+    unsafe_allow_html=True,
+)
+
+st.caption(
+    "Amenities are grouped exactly as they were during model training. "
+    "Property Readiness amenities are selected by default."
+)
+
+amenity_columns = st.columns(3, gap="medium")
+
+for group_index, (
+    group_feature,
+    members,
+) in enumerate(
+    bundle["amenity_groups"].items()
 ):
-    st.caption(
-        "Amenities are grouped exactly as they were during model training. "
-        "Property Readiness amenities are selected by default."
+    group_title = pretty_label(
+        group_feature
     )
 
-    amenity_columns = st.columns(3, gap="medium")
-
-    for group_index, (
-        group_feature,
-        members,
-    ) in enumerate(
-        bundle["amenity_groups"].items()
-    ):
-        group_title = pretty_label(
-            group_feature
-        )
-
-        is_property_readiness = (
-            group_feature
-            == "AmenityGroup_Property_Readiness"
-        )
-
-        with amenity_columns[
-            group_index % 3
-        ]:
-            with st.container(border=True):
-                st.markdown(
-                    f'<div class="amenity-group-title">'
-                    f'{escape(group_title)}'
-                    f'</div>',
-                    unsafe_allow_html=True,
-                )
-
-                control_cols = st.columns(2)
-
-                with control_cols[0]:
-                    select_all_clicked = st.button(
-                        "Select all",
-                        key=f"select_all_{group_feature}",
-                        use_container_width=True,
-                    )
-
-                with control_cols[1]:
-                    clear_all_clicked = st.button(
-                        "Clear all",
-                        key=f"clear_all_{group_feature}",
-                        use_container_width=True,
-                    )
-
-                if select_all_clicked:
-                    for amenity in members:
-                        st.session_state[
-                            f"amenity_{group_feature}_{amenity}"
-                        ] = True
-
-                if clear_all_clicked:
-                    for amenity in members:
-                        st.session_state[
-                            f"amenity_{group_feature}_{amenity}"
-                        ] = False
-
-                checkbox_cols = st.columns(2)
-
-                for index, amenity in enumerate(
-                    members
-                ):
-                    amenity_key = (
-                        f"amenity_"
-                        f"{group_feature}_"
-                        f"{amenity}"
-                    )
-
-                    with checkbox_cols[index % 2]:
-                        amenity_checks[
-                            amenity
-                        ] = st.checkbox(
-                            pretty_label(amenity),
-                            value=is_property_readiness,
-                            key=amenity_key,
-                        )
-
-    standalone_column_index = (
-        len(bundle["amenity_groups"])
-        % 3
-    )
-
-    beach_city_keys = {
-        "myrtle_beach",
-        "carolina_beach",
-        "wilmington",
-    }
-
-    beach_access_available = (
-        selected_city in beach_city_keys
+    is_property_readiness = (
+        group_feature
+        == "AmenityGroup_Property_Readiness"
     )
 
     with amenity_columns[
-        standalone_column_index
+        group_index % 3
     ]:
-        with st.container(border=True):
-            st.markdown(
-                '<div class="amenity-group-title">'
-                'Standalone amenities'
-                '</div>',
-                unsafe_allow_html=True,
-            )
+        with st.expander(
+            group_title,
+            expanded=False,
+        ):
+            control_cols = st.columns(2)
 
-            standalone_cols = st.columns(2)
-
-            for index, (
-                display_name,
-                info,
-            ) in enumerate(
-                bundle[
-                    "standalone_amenities"
-                ].items()
-            ):
-                source_name = info["source"]
-
-                is_beach_access = (
-                    "beach" in display_name.lower()
-                    or "beach" in source_name.lower()
+            with control_cols[0]:
+                select_all_clicked = st.button(
+                    "Select all",
+                    key=f"select_all_{group_feature}",
+                    use_container_width=True,
                 )
 
-                checkbox_disabled = (
-                    is_beach_access
-                    and not beach_access_available
+            with control_cols[1]:
+                clear_all_clicked = st.button(
+                    "Clear all",
+                    key=f"clear_all_{group_feature}",
+                    use_container_width=True,
                 )
 
-                checkbox_key = (
-                    f"standalone_"
-                    f"{source_name}"
-                )
-
-                if (
-                    checkbox_disabled
-                    and st.session_state.get(
-                        checkbox_key,
-                        False,
-                    )
-                ):
+            if select_all_clicked:
+                for amenity in members:
                     st.session_state[
-                        checkbox_key
+                        f"amenity_{group_feature}_{amenity}"
+                    ] = True
+
+            if clear_all_clicked:
+                for amenity in members:
+                    st.session_state[
+                        f"amenity_{group_feature}_{amenity}"
                     ] = False
 
-                with standalone_cols[index % 2]:
+            checkbox_cols = st.columns(2)
+
+            for index, amenity in enumerate(
+                members
+            ):
+                amenity_key = (
+                    f"amenity_"
+                    f"{group_feature}_"
+                    f"{amenity}"
+                )
+
+                with checkbox_cols[index % 2]:
                     amenity_checks[
-                        source_name
+                        amenity
                     ] = st.checkbox(
-                        pretty_label(
-                            display_name
-                        ),
-                        key=checkbox_key,
-                        disabled=checkbox_disabled,
-                        help=(
-                            "Available only for Myrtle Beach, "
-                            "Carolina Beach, or Wilmington."
-                            if is_beach_access
-                            else None
-                        ),
+                        pretty_label(amenity),
+                        value=is_property_readiness,
+                        key=amenity_key,
                     )
 
-            if not beach_access_available:
-                st.caption(
-                    "Beach Access can only be selected for "
-                    "Myrtle Beach, Carolina Beach, or Wilmington."
+standalone_column_index = (
+    len(bundle["amenity_groups"])
+    % 3
+)
+
+beach_city_keys = {
+    "myrtle_beach",
+    "carolina_beach",
+    "wilmington",
+}
+
+beach_access_available = (
+    selected_city in beach_city_keys
+)
+
+with amenity_columns[
+    standalone_column_index
+]:
+    with st.expander(
+        "Standalone amenities",
+        expanded=False,
+    ):
+        standalone_cols = st.columns(2)
+
+        for index, (
+            display_name,
+            info,
+        ) in enumerate(
+            bundle[
+                "standalone_amenities"
+            ].items()
+        ):
+            source_name = info["source"]
+
+            is_beach_access = (
+                "beach" in display_name.lower()
+                or "beach" in source_name.lower()
+            )
+
+            checkbox_disabled = (
+                is_beach_access
+                and not beach_access_available
+            )
+
+            checkbox_key = (
+                f"standalone_"
+                f"{source_name}"
+            )
+
+            if (
+                checkbox_disabled
+                and st.session_state.get(
+                    checkbox_key,
+                    False,
                 )
+            ):
+                st.session_state[
+                    checkbox_key
+                ] = False
+
+            with standalone_cols[index % 2]:
+                amenity_checks[
+                    source_name
+                ] = st.checkbox(
+                    pretty_label(
+                        display_name
+                    ),
+                    key=checkbox_key,
+                    disabled=checkbox_disabled,
+                    help=(
+                        "Available only for Myrtle Beach, "
+                        "Carolina Beach, or Wilmington."
+                        if is_beach_access
+                        else None
+                    ),
+                )
+
+        if not beach_access_available:
+            st.caption(
+                "Beach Access can only be selected for "
+                "Myrtle Beach, Carolina Beach, or Wilmington."
+            )
 
 
 # ============================================================
