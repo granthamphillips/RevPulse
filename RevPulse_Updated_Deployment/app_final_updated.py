@@ -163,7 +163,7 @@ st.markdown(
             color: inherit;
             border: 1px solid rgba(47, 158, 98, .72);
             border-radius: 12px;
-            margin-top: 1.3rem;
+            margin: 0;
             box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
         }
 
@@ -243,6 +243,10 @@ st.markdown(
             border: none;
             border-top: 1px solid rgba(127, 127, 127, .28);
             margin: 1.35rem 0;
+        }
+
+        .summary-bottom-space {
+            height: 1.35rem;
         }
 
         div[data-testid="stCheckbox"] label {
@@ -2670,7 +2674,7 @@ summary_placeholder = st.container()
 
 with st.expander(
     "Market and property",
-    expanded=True,
+    expanded=False,
 ):
     market_cols = st.columns(4, gap="medium")
 
@@ -2730,7 +2734,7 @@ with st.expander(
 
 with st.expander(
     "Listing structure",
-    expanded=True,
+    expanded=False,
 ):
     numeric_summary = bundle["numeric_summary"]
 
@@ -2781,7 +2785,7 @@ with st.expander(
 
 with st.expander(
     "Policies and listing settings",
-    expanded=True,
+    expanded=False,
 ):
     policy_cols = st.columns(4, gap="medium")
 
@@ -3084,6 +3088,7 @@ with summary_placeholder:
     summary_left, summary_right = st.columns(
         [0.72, 1.28],
         gap="large",
+        vertical_alignment="center",
     )
 
     with summary_left:
@@ -3185,6 +3190,11 @@ with summary_placeholder:
             revenue_card_html,
             unsafe_allow_html=True,
         )
+
+    st.markdown(
+        '<div class="summary-bottom-space"></div>',
+        unsafe_allow_html=True,
+    )
 
 # ============================================================
 # FULL-WIDTH CONTRIBUTION CHART
