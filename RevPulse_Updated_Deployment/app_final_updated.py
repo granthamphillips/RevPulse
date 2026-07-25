@@ -193,6 +193,18 @@ st.markdown(
             color: #2f9e62;
         }
 
+        .metric-low {
+            color: #d85b62 !important;
+        }
+
+        .metric-mid {
+            color: inherit !important;
+        }
+
+        .metric-high {
+            color: #2f9e62 !important;
+        }
+
         .insight-detail {
             font-size: .72rem;
             line-height: 1.38;
@@ -223,11 +235,15 @@ st.markdown(
             font-size: .82rem;
         }
 
-        .revenue-hero-grid {
+        .hero-summary-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.75fr) minmax(300px, .9fr);
+            grid-template-columns: minmax(0, 2.25fr) minmax(300px, .85fr);
             gap: 1rem;
             align-items: stretch;
+        }
+
+        .hero-summary-grid > * {
+            height: 100%;
         }
 
         .revenue-primary {
@@ -237,10 +253,12 @@ st.markdown(
         .property-score-panel {
             box-sizing: border-box;
             min-width: 0;
-            padding: 1.05rem 1.15rem;
-            background: rgba(127, 127, 127, .09);
-            border: 1px solid rgba(127, 127, 127, .28);
-            border-radius: 10px;
+            height: 100%;
+            padding: 1.15rem 1.25rem;
+            background: rgba(127, 127, 127, .08);
+            border: 1px solid rgba(127, 127, 127, .30);
+            border-radius: 12px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .08);
         }
 
         .property-score-value {
@@ -320,6 +338,7 @@ st.markdown(
 
         .revenue-card {
             box-sizing: border-box;
+            height: 100%;
             padding: 1.2rem 1.25rem;
             background:
                 linear-gradient(
@@ -515,7 +534,7 @@ st.markdown(
                 padding-right: 1rem;
             }
 
-            .revenue-hero-grid {
+            .hero-summary-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -3634,6 +3653,17 @@ with summary_placeholder:
             return "Below 1st percentile"
         return percentile_label(value)
 
+    def metric_color_class(value: float) -> str:
+        if value < 25.0:
+            return "metric-low"
+        if value >= 75.0:
+            return "metric-high"
+        return "metric-mid"
+
+    market_color_class = metric_color_class(performance_percentile)
+    amenity_color_class = metric_color_class(amenity_strength_score)
+    property_score_color_class = metric_color_class(overall_property_score)
+
     score_rows = "".join(
         f'<li><span>{escape(display_label)}</span>'
         f'<span class="score-stars">{percentile_stars(property_scores.get(score_key, 50.0))}</span></li>'
@@ -3646,8 +3676,8 @@ with summary_placeholder:
     )
 
     revenue_card_html = (
+        '<div class="hero-summary-grid">'
         '<div class="revenue-card">'
-        '<div class="revenue-hero-grid">'
         '<div class="revenue-primary">'
         '<div class="revenue-eyebrow">Annualized revenue potential</div>'
         f'<div class="revenue-main">${annualized_revenue:,.0f}</div>'
@@ -3667,12 +3697,11 @@ with summary_placeholder:
         'occupancy-adjusted estimate, not gross booking revenue'
         '</div>'
         '</div>'
+        '</div>'
         '<div class="property-score-panel">'
         '<div class="insight-title">Property score</div>'
-        f'<div class="property-score-value">{overall_property_score:.0f} / 100</div>'
+        f'<div class="property-score-value {property_score_color_class}">{overall_property_score:.0f} / 100</div>'
         f'<ul class="score-list">{score_rows}</ul>'
-        ''
-        '</div>'
         '</div>'
         '</div>'
     )
@@ -3697,12 +3726,12 @@ with summary_placeholder:
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Market percentile</div>'
-        f'<div class="insight-value insight-value-positive">{compact_percentile_display(performance_percentile)}</div>'
+        f'<div class="insight-value {market_color_class}">{compact_percentile_display(performance_percentile)}</div>'
         f'<div class="insight-detail">Performance relative to {escape(reference_group_label)}.</div>'
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Amenity strength percentile</div>'
-        f'<div class="insight-value insight-value-positive">{compact_percentile_display(amenity_strength_score)}</div>'
+        f'<div class="insight-value {amenity_color_class}">{compact_percentile_display(amenity_strength_score)}</div>'
         f'<div class="insight-detail">Amenity contribution relative to {escape(reference_group_label)}.</div>'
         '</div>'
         '</div>'
