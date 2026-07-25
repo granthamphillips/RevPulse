@@ -2200,12 +2200,68 @@ def build_comparable_map(
             '</div>'
         )
 
-        tooltip_text = (
-            f"Comparable {rank} | "
-            f"${actual_revpar:,.1f} RevPAR"
+        tooltip_html = (
+            '<div style="'
+            'font-family:Arial,sans-serif;'
+            'min-width:220px;'
+            'line-height:1.35;'
+            '">'
+            '<div style="'
+            'font-size:13px;'
+            'font-weight:700;'
+            'margin-bottom:2px;'
+            '">'
+            f'{escape(comparable_label)}'
+            '</div>'
+            '<div style="'
+            'font-size:11px;'
+            'color:#64748b;'
+            'margin-bottom:6px;'
+            '">'
+            f'{escape(property_category)}'
+            '</div>'
+            '<div style="font-size:12px;">'
+            '<b>Adjusted RevPAR:</b> '
+            f'${actual_revpar:,.1f}<br>'
+            '<b>Vs. estimate:</b> '
+            f'{difference_sign}'
+            f'${abs(revpar_difference):,.1f}<br>'
+            '<b>Layout:</b> '
+            f'{compact_number(listing.get("bedrooms"))} bd'
+            ' · '
+            f'{compact_number(listing.get("baths"))} bath'
+            ' · sleeps '
+            f'{compact_number(listing.get("guests"))}<br>'
+            '<b>Match index:</b> '
+            f'{float(listing["Match index"]):.0f}/100'
+            '</div>'
+            '</div>'
         )
 
-        folium.CircleMarker(
+        marker_html = (
+            '<div style="'
+            'width:28px;'
+            'height:28px;'
+            f'background:{marker_color};'
+            'border:2px solid rgba(255,255,255,.95);'
+            'border-radius:50% 50% 50% 0;'
+            'transform:rotate(-45deg);'
+            'box-shadow:0 2px 7px rgba(0,0,0,.28);'
+            'position:relative;'
+            '">'
+            '<div style="'
+            'width:8px;'
+            'height:8px;'
+            'background:#ffffff;'
+            'border-radius:50%;'
+            'position:absolute;'
+            'left:8px;'
+            'top:8px;'
+            '"></div>'
+            '</div>'
+        )
+
+        folium.Marker(
             location=[
                 float(
                     listing[
@@ -2218,13 +2274,19 @@ def build_comparable_map(
                     ]
                 ),
             ],
-            radius=8,
-            color=marker_color,
-            weight=2,
-            fill=True,
-            fill_color=marker_color,
-            fill_opacity=0.82,
-            tooltip=tooltip_text,
+            icon=folium.DivIcon(
+                html=marker_html,
+                icon_size=(28, 28),
+                icon_anchor=(14, 28),
+                popup_anchor=(0, -28),
+                class_name="revpulse-map-pin",
+            ),
+            tooltip=folium.Tooltip(
+                tooltip_html,
+                sticky=True,
+                direction="top",
+                offset=(0, -22),
+            ),
             popup=folium.Popup(
                 popup_html,
                 max_width=290,
@@ -4476,28 +4538,32 @@ else:
             drop=True
         )
 
-        st.dataframe(
-            comparable_table,
-            hide_index=True,
-            use_container_width=True,
-            column_config={
-                "Actual adjusted RevPAR": (
-                    st.column_config.NumberColumn(
-                        format="$%.1f",
-                    )
-                ),
-                "Difference vs prediction": (
-                    st.column_config.NumberColumn(
-                        format="$%+.1f",
-                    )
-                ),
-                "Match index": (
-                    st.column_config.NumberColumn(
-                        format="%.0f / 100",
-                    )
-                ),
-            },
-        )
+        with st.expander(
+            f"View comparable property details ({len(comparable_table)})",
+            expanded=False,
+        ):
+            st.dataframe(
+                comparable_table,
+                hide_index=True,
+                use_container_width=True,
+                column_config={
+                    "Actual adjusted RevPAR": (
+                        st.column_config.NumberColumn(
+                            format="$%.1f",
+                        )
+                    ),
+                    "Difference vs prediction": (
+                        st.column_config.NumberColumn(
+                            format="$%+.1f",
+                        )
+                    ),
+                    "Match index": (
+                        st.column_config.NumberColumn(
+                            format="%.0f / 100",
+                        )
+                    ),
+                },
+            )
 
         st.caption(
             "The proposed listing is not plotted because the app does not "
