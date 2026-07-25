@@ -107,7 +107,7 @@ st.markdown(
         }
 
         .block-container {
-            padding: 2rem 2.5rem;
+            padding: 1.35rem 2.5rem 2rem 2.5rem;
             max-width: 1240px;
         }
 
@@ -117,20 +117,20 @@ st.markdown(
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin: 0 auto 1.35rem auto;
+            margin: 0 auto .9rem auto;
         }
 
         .brand-logo {
             display: block;
-            width: min(570px, 92vw);
+            width: min(500px, 88vw);
             max-width: 100%;
             height: auto;
             filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .14));
         }
 
         .brand-tagline {
-            margin-top: .22rem;
-            font-size: .98rem;
+            margin-top: .12rem;
+            font-size: .92rem;
             font-weight: 500;
             color: inherit;
             opacity: .72;
@@ -138,7 +138,7 @@ st.markdown(
         }
 
         .brand-parent {
-            margin-top: .35rem;
+            margin-top: .2rem;
             font-size: .7rem;
             font-weight: 650;
             letter-spacing: .8px;
@@ -151,13 +151,14 @@ st.markdown(
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: .9rem;
-            margin: 1rem 0 .1rem 0;
+            margin: .9rem 0 .1rem 0;
             align-items: stretch;
         }
 
         .insight-card {
             box-sizing: border-box;
             min-width: 0;
+            min-height: 168px;
             height: 100%;
             padding: .95rem 1rem;
             background: rgba(127, 127, 127, .08);
@@ -192,7 +193,7 @@ st.markdown(
 
         .insight-detail {
             font-size: .72rem;
-            line-height: 1.42;
+            line-height: 1.38;
             color: inherit;
             opacity: .70;
             margin-top: .38rem;
@@ -217,6 +218,50 @@ st.markdown(
         .score-stars {
             white-space: nowrap;
             letter-spacing: .45px;
+        }
+
+        .revenue-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.8fr) minmax(245px, .72fr);
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .revenue-primary {
+            min-width: 0;
+        }
+
+        .property-score-panel {
+            box-sizing: border-box;
+            min-width: 0;
+            padding: .9rem 1rem;
+            background: rgba(127, 127, 127, .09);
+            border: 1px solid rgba(127, 127, 127, .28);
+            border-radius: 10px;
+        }
+
+        .property-score-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -.45px;
+            color: inherit;
+        }
+
+        .property-score-note {
+            font-size: .66rem;
+            line-height: 1.35;
+            color: inherit;
+            opacity: .62;
+            margin-top: .55rem;
+        }
+
+        .prediction-delta {
+            margin-top: .42rem;
+            font-size: .72rem;
+            line-height: 1.35;
+            color: inherit;
+            opacity: .72;
         }
 
         div[data-testid="stExpander"] details {
@@ -272,7 +317,7 @@ st.markdown(
 
         .revenue-card {
             box-sizing: border-box;
-            padding: 1.15rem 1.2rem;
+            padding: 1.2rem 1.25rem;
             background:
                 linear-gradient(
                     135deg,
@@ -361,7 +406,7 @@ st.markdown(
         .rule {
             border: none;
             border-top: 1px solid rgba(127, 127, 127, .28);
-            margin: 1.35rem 0;
+            margin: 1.05rem 0 1.15rem 0;
         }
 
         .summary-bottom-space {
@@ -465,6 +510,10 @@ st.markdown(
             .block-container {
                 padding-left: 1rem;
                 padding-right: 1rem;
+            }
+
+            .revenue-hero-grid {
+                grid-template-columns: 1fr;
             }
 
             .revenue-grid {
@@ -3547,68 +3596,6 @@ with summary_placeholder:
     monthly_revenue = annualized_revenue / 12
     city_median_annualized_revenue = selected_city_median * 365
 
-    summary_left, summary_right = st.columns(
-        [1.28, 0.72],
-        gap="large",
-        vertical_alignment="center",
-    )
-
-    with summary_left:
-        revenue_card_html = (
-            f'<div class="revenue-card">'
-            f'<div class="revenue-eyebrow">Annualized revenue potential</div>'
-            f'<div class="revenue-main">${annualized_revenue:,.0f}</div>'
-            f'<div class="revenue-sub">Adjusted RevPAR × 365 available nights</div>'
-            f'<div class="revenue-grid">'
-            f'<div class="revenue-stat">'
-            f'<div class="revenue-stat-value">${monthly_revenue:,.0f}</div>'
-            f'<div class="revenue-stat-label">Monthly equivalent</div>'
-            f'</div>'
-            f'<div class="revenue-stat">'
-            f'<div class="revenue-stat-value">${city_median_annualized_revenue:,.0f}</div>'
-            f'<div class="revenue-stat-label">{selected_city_label} median annualized</div>'
-            f'</div>'
-            f'</div>'
-            f'<div class="revenue-context">'
-            f'{pretty_label(selected_property)} in {pretty_label(selected_city)} · '
-            f'occupancy-adjusted estimate, not gross booking revenue'
-            f'</div>'
-            f'</div>'
-        )
-
-        st.markdown(
-            revenue_card_html,
-            unsafe_allow_html=True,
-        )
-
-    with summary_right:
-        st.markdown(
-            '<div class="section-label">Prediction</div>',
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            f'<div class="hero-value">${revpar:,.0f}</div>',
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            '<div class="hero-label">Predicted adjusted RevPAR per night</div>',
-            unsafe_allow_html=True,
-        )
-
-        direction = "above" if difference >= 0 else "below"
-        sign = "+" if difference >= 0 else "-"
-
-        st.markdown(
-            f'<div class="hero-context">'
-            f'{sign}${abs(difference):,.0f} '
-            f'({sign}{abs(difference_pct):.0f}%) '
-            f'{direction} the {selected_city_label} median'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
     if prediction_range is not None:
         (
             lower_revpar,
@@ -3620,22 +3607,24 @@ with summary_placeholder:
         upper_annual = upper_revpar * 365
         interval_value = f'${lower_annual:,.0f} – ${upper_annual:,.0f}'
         interval_detail = (
-            f'Middle 50% out-of-sample predicted range · '
-            f'{empirical_coverage * 100:.1f}% observed calibration coverage '
-            f'across {interval_sample_size:,} validation rows.'
+            f'Typical middle-50% range from '
+            f'{interval_sample_size:,} out-of-sample validation predictions.'
         )
     else:
         interval_value = 'Unavailable'
-        interval_detail = 'No compatible 50% validation calibration row was found for this market.'
+        interval_detail = 'No compatible validation range was found for this market.'
 
     performance_percentile = property_scores.get("Performance Percentile", 50.0)
     amenity_strength_score = property_scores.get("Amenities", 50.0)
     overall_property_score = property_scores.get("Overall", 50.0)
 
-    amenity_detail = (
-        f'Model-based amenity contribution versus '
-        f'{escape(reference_group_label)} (n={len(reference_group):,}).'
-    )
+    direction = "above" if difference >= 0 else "below"
+    sign = "+" if difference >= 0 else "-"
+
+    def compact_percentile_display(value: float) -> str:
+        if value < 1.0:
+            return "Below 1st"
+        return percentile_label(value)
 
     score_rows = "".join(
         f'<li><span>{escape(display_label)}</span>'
@@ -3648,8 +3637,51 @@ with summary_placeholder:
         ]
     )
 
+    revenue_card_html = (
+        '<div class="revenue-card">'
+        '<div class="revenue-hero-grid">'
+        '<div class="revenue-primary">'
+        '<div class="revenue-eyebrow">Annualized revenue potential</div>'
+        f'<div class="revenue-main">${annualized_revenue:,.0f}</div>'
+        '<div class="revenue-sub">Adjusted RevPAR × 365 available nights</div>'
+        '<div class="revenue-grid">'
+        '<div class="revenue-stat">'
+        f'<div class="revenue-stat-value">${monthly_revenue:,.0f}</div>'
+        '<div class="revenue-stat-label">Monthly equivalent</div>'
+        '</div>'
+        '<div class="revenue-stat">'
+        f'<div class="revenue-stat-value">${city_median_annualized_revenue:,.0f}</div>'
+        f'<div class="revenue-stat-label">{selected_city_label} median annualized</div>'
+        '</div>'
+        '</div>'
+        '<div class="revenue-context">'
+        f'{pretty_label(selected_property)} in {pretty_label(selected_city)} · '
+        'occupancy-adjusted estimate, not gross booking revenue'
+        '</div>'
+        '</div>'
+        '<div class="property-score-panel">'
+        '<div class="insight-title">Property score</div>'
+        f'<div class="property-score-value">{overall_property_score:.0f} / 100</div>'
+        f'<ul class="score-list">{score_rows}</ul>'
+        '<div class="property-score-note">Average of four empirical category percentiles.</div>'
+        '</div>'
+        '</div>'
+        '</div>'
+    )
+
+    st.markdown(
+        revenue_card_html,
+        unsafe_allow_html=True,
+    )
+
     insight_cards_html = (
         '<div class="insight-grid">'
+        '<div class="insight-card">'
+        '<div class="insight-title">Predicted adjusted RevPAR</div>'
+        f'<div class="insight-value insight-value-positive">${revpar:,.0f} / night</div>'
+        f'<div class="prediction-delta">{sign}${abs(difference):,.0f} '
+        f'({sign}{abs(difference_pct):.0f}%) {direction} the {selected_city_label} median.</div>'
+        '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Typical revenue range</div>'
         f'<div class="insight-value">{interval_value}</div>'
@@ -3657,19 +3689,13 @@ with summary_placeholder:
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Market percentile</div>'
-        f'<div class="insight-value insight-value-positive">{performance_percentile:.0f}th</div>'
-        f'<div class="insight-detail">Predicted RevPAR versus actual historical performance among {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
+        f'<div class="insight-value insight-value-positive">{compact_percentile_display(performance_percentile)}</div>'
+        f'<div class="insight-detail">Performance relative to {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Amenity strength percentile</div>'
-        f'<div class="insight-value insight-value-positive">{amenity_strength_score:.0f}th</div>'
-        f'<div class="insight-detail">{amenity_detail}</div>'
-        '</div>'
-        '<div class="insight-card">'
-        '<div class="insight-title">Property score</div>'
-        f'<div class="insight-value">{overall_property_score:.0f} / 100</div>'
-        f'<ul class="score-list">{score_rows}</ul>'
-        f'<div class="insight-detail">Average of four empirical category percentiles.</div>'
+        f'<div class="insight-value insight-value-positive">{compact_percentile_display(amenity_strength_score)}</div>'
+        f'<div class="insight-detail">Amenity contribution relative to {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
         '</div>'
         '</div>'
     )
