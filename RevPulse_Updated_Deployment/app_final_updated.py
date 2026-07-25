@@ -759,7 +759,61 @@ st.markdown(
             }
         }
 
+        .mobile-factor-list {
+            display: none;
+            margin: .2rem 0 .65rem 0;
+            border-top: 1px solid rgba(127, 127, 127, .22);
+            border-bottom: 1px solid rgba(127, 127, 127, .22);
+        }
+
+        .mobile-factor-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .78rem .05rem;
+            border-bottom: 1px solid rgba(127, 127, 127, .16);
+        }
+
+        .mobile-factor-row:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-factor-label {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: .92rem;
+            font-weight: 520;
+            line-height: 1.32;
+            color: inherit;
+            overflow-wrap: anywhere;
+        }
+
+        .mobile-factor-impact {
+            flex: 0 0 auto;
+            font-size: .95rem;
+            font-weight: 800;
+            line-height: 1.32;
+            white-space: nowrap;
+        }
+
+        .mobile-factor-impact-positive {
+            color: #2f9e62;
+        }
+
+        .mobile-factor-impact-negative {
+            color: #b83232;
+        }
+
         @media (max-width: 760px) {
+            div[data-testid="stPlotlyChart"] {
+                display: none !important;
+            }
+
+            .mobile-factor-list {
+                display: block;
+            }
+
             .block-container {
                 padding-left: 1rem;
                 padding-right: 1rem;
@@ -4356,6 +4410,32 @@ else:
         config={
             "displayModeBar": False
         },
+    )
+
+    mobile_factor_rows = []
+    for _, row in chart_df.sort_values(
+        "Contribution",
+        ascending=False,
+    ).iterrows():
+        impact_class = (
+            "mobile-factor-impact-positive"
+            if float(row["Contribution"]) >= 0
+            else "mobile-factor-impact-negative"
+        )
+        mobile_factor_rows.append(
+            '<div class="mobile-factor-row">'
+            f'<div class="mobile-factor-label">{escape(str(row["Label"]))}</div>'
+            f'<div class="mobile-factor-impact {impact_class}">'
+            f'{escape(str(row["Display impact"]))}'
+            '</div>'
+            '</div>'
+        )
+
+    st.markdown(
+        '<div class="mobile-factor-list">'
+        + ''.join(mobile_factor_rows)
+        + '</div>',
+        unsafe_allow_html=True,
     )
 
 st.caption(
