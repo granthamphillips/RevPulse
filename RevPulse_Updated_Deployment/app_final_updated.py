@@ -4029,17 +4029,32 @@ st.caption(
     "relative to the average listing, while negative values decrease it."
 )
 
-st.radio(
-    "Display",
-    options=["All factors", "Key factors"],
-    horizontal=True,
-    key="factor_display_mode",
-    help=(
-        "All factors shows the 15 largest absolute factors. "
-        "Key factors shows the three strongest positive and "
-        "three strongest negative factors."
-    ),
+display_toggle_help = (
+    "All factors shows the 15 largest absolute factors. "
+    "Key factors shows the three strongest positive and "
+    "three strongest negative factors."
 )
+
+# Prefer a pill-style segmented toggle when available.
+if "factor_display_mode" not in st.session_state:
+    st.session_state["factor_display_mode"] = factor_display_mode
+
+if hasattr(st, "segmented_control"):
+    st.segmented_control(
+        "Display",
+        options=["All factors", "Key factors"],
+        selection_mode="single",
+        key="factor_display_mode",
+        help=display_toggle_help,
+    )
+else:
+    st.radio(
+        "Display",
+        options=["All factors", "Key factors"],
+        horizontal=True,
+        key="factor_display_mode",
+        help=display_toggle_help,
+    )
 
 
 # ============================================================
