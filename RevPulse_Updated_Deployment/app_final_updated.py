@@ -3324,7 +3324,6 @@ st.markdown(
 )
 
 st.caption(
-    "Amenities are grouped exactly as they were during model training. "
     "Use Select all or Clear all within each group to speed up entry."
 )
 
@@ -3795,22 +3794,62 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-chart_df = (
-    contribution_df.reindex(
-        contribution_df[
-            "Contribution"
-        ]
-        .abs()
-        .sort_values(
-            ascending=False
-        )
-        .index
-    )
-    .head(15)
-    .sort_values(
-        "Contribution"
-    )
+factor_display_mode = st.session_state.get(
+    "factor_display_mode",
+    "All factors",
 )
+
+# Preserve the user's selection across upgrades from the earlier labels.
+if factor_display_mode == "Full":
+    factor_display_mode = "All factors"
+    st.session_state["factor_display_mode"] = factor_display_mode
+elif factor_display_mode == "Compact":
+    factor_display_mode = "Key factors"
+    st.session_state["factor_display_mode"] = factor_display_mode
+
+if factor_display_mode == "Key factors":
+    positive_factors = (
+        contribution_df.loc[
+            contribution_df["Contribution"] > 0
+        ]
+        .nlargest(3, "Contribution")
+    )
+
+    negative_factors = (
+        contribution_df.loc[
+            contribution_df["Contribution"] < 0
+        ]
+        .nsmallest(3, "Contribution")
+    )
+
+    chart_df = (
+        pd.concat(
+            [negative_factors, positive_factors],
+            axis=0,
+        )
+        .drop_duplicates(
+            subset=["Label"],
+            keep="first",
+        )
+        .sort_values("Contribution")
+    )
+else:
+    chart_df = (
+        contribution_df.reindex(
+            contribution_df[
+                "Contribution"
+            ]
+            .abs()
+            .sort_values(
+                ascending=False
+            )
+            .index
+        )
+        .head(15)
+        .sort_values(
+            "Contribution"
+        )
+    )
 
 
 if chart_df.empty:
@@ -3932,9 +3971,16 @@ else:
 
 
     figure.update_layout(
-        height=max(
-            500,
-            len(chart_df) * 38,
+        height=(
+            max(
+                320,
+                len(chart_df) * 46,
+            )
+            if factor_display_mode == "Key factors"
+            else max(
+                500,
+                len(chart_df) * 38,
+            )
         ),
         margin=dict(
             l=260,
@@ -3981,6 +4027,18 @@ else:
 st.caption(
     "Positive values increase the predicted adjusted RevPAR "
     "relative to the average listing, while negative values decrease it."
+)
+
+st.radio(
+    "Display",
+    options=["All factors", "Key factors"],
+    horizontal=True,
+    key="factor_display_mode",
+    help=(
+        "All factors shows the 15 largest absolute factors. "
+        "Key factors shows the three strongest positive and "
+        "three strongest negative factors."
+    ),
 )
 
 
