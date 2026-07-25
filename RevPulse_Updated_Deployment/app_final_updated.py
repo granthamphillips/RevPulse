@@ -3657,6 +3657,21 @@ with summary_placeholder:
             return "Below 1st percentile"
         return percentile_label(value)
 
+    def percentile_band_label(value: float) -> str:
+        if value < 10.0:
+            return "Very low"
+        if value < 25.0:
+            return "Low"
+        if value < 40.0:
+            return "Below average"
+        if value <= 60.0:
+            return "Typical"
+        if value < 75.0:
+            return "Above average"
+        if value < 90.0:
+            return "Strong"
+        return "Exceptional"
+
     def metric_color_class(value: float) -> str:
         if value < 25.0:
             return "metric-low"
@@ -3736,14 +3751,14 @@ with summary_placeholder:
         f'<div class="insight-detail">{escape(interval_detail)}</div>'
         '</div>'
         '<div class="insight-card">'
-        '<div class="insight-title">Market percentile</div>'
-        f'<div class="insight-value {market_color_class}">{compact_percentile_display(performance_percentile)}</div>'
-        f'<div class="insight-detail">Performance relative to {escape(reference_group_label)}.</div>'
+        '<div class="insight-title">Market position</div>'
+        f'<div class="insight-value {market_color_class}">{percentile_band_label(performance_percentile)}</div>'
+        f'<div class="insight-detail">{compact_percentile_display(performance_percentile)} among {escape(reference_group_label)}.</div>'
         '</div>'
         '<div class="insight-card">'
-        '<div class="insight-title">Amenity strength percentile</div>'
-        f'<div class="insight-value {amenity_color_class}">{compact_percentile_display(amenity_strength_score)}</div>'
-        f'<div class="insight-detail">Amenity contribution relative to {escape(reference_group_label)}.</div>'
+        '<div class="insight-title">Amenity package</div>'
+        f'<div class="insight-value {amenity_color_class}">{percentile_band_label(amenity_strength_score)}</div>'
+        f'<div class="insight-detail">{compact_percentile_display(amenity_strength_score)} among {escape(reference_group_label)}.</div>'
         '</div>'
         '</div>'
     )
