@@ -3956,7 +3956,7 @@ with summary_placeholder:
         lower_annual = lower_revpar * 365
         upper_annual = upper_revpar * 365
         interval_value = f'${lower_annual:,.0f} – ${upper_annual:,.0f}'
-        interval_detail = 'Typical middle-50% model range.'
+        interval_detail = 'Calibrated middle-50% estimate range.'
     else:
         interval_value = 'Unavailable'
         interval_detail = 'No compatible validation range was found for this market.'
@@ -3970,7 +3970,7 @@ with summary_placeholder:
 
     def compact_percentile_display(value: float) -> str:
         if value < 1.0:
-            return "Below 1st percentile"
+            return "Bottom 1%"
         return percentile_label(value)
 
     def percentile_band_label(value: float) -> str:
@@ -4701,7 +4701,7 @@ This tool evaluates **revenue performance**, not complete investment returns. It
     )
 
 with st.expander(
-    "View exact model input row"
+    "View model inputs"
 ):
 
     st.dataframe(
