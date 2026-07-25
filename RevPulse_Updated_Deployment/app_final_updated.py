@@ -117,7 +117,9 @@ st.markdown(
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin: 0 auto .55rem auto;
+            position: relative;
+            top: 1rem;
+            margin: 0 auto -.45rem auto;
         }
 
         .brand-logo {
@@ -3142,6 +3144,11 @@ summary_placeholder = st.container()
 # INPUTS
 # ============================================================
 
+st.markdown(
+    '<div class="section-label">Listing details</div>',
+    unsafe_allow_html=True,
+)
+
 with st.expander(
     "Market and property",
     expanded=False,
@@ -3685,7 +3692,7 @@ with summary_placeholder:
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Typical revenue range</div>'
-        f'<div class="insight-value">{interval_value}</div>'
+        f'<div class="insight-value insight-value-positive">{interval_value}</div>'
         f'<div class="insight-detail">{escape(interval_detail)}</div>'
         '</div>'
         '<div class="insight-card">'
