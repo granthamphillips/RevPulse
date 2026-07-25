@@ -3590,10 +3590,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.caption(
-    "Use Select all or Clear all within each group to speed up entry."
-)
-
 amenity_columns = st.columns(3, gap="medium")
 
 for group_index, (
@@ -3903,10 +3899,7 @@ with summary_placeholder:
         lower_annual = lower_revpar * 365
         upper_annual = upper_revpar * 365
         interval_value = f'${lower_annual:,.0f} – ${upper_annual:,.0f}'
-        interval_detail = (
-            f'Typical middle-50% range from '
-            f'{interval_sample_size:,} out-of-sample validation predictions.'
-        )
+        interval_detail = 'Typical middle-50% model range.'
     else:
         interval_value = 'Unavailable'
         interval_detail = 'No compatible validation range was found for this market.'
@@ -3945,6 +3938,16 @@ with summary_placeholder:
             return "metric-high"
         return "metric-mid"
 
+    def financial_metric_color_class(value: float) -> str:
+        # Revenue metrics use a stricter downside threshold than descriptive
+        # percentile cards: below the 40th percentile is financially weak,
+        # while green remains reserved for top-quartile performance.
+        if value < 40.0:
+            return "metric-low"
+        if value >= 75.0:
+            return "metric-high"
+        return "metric-mid"
+
     def property_score_color(value: float) -> str:
         if value < 40.0:
             return "metric-low"
@@ -3953,6 +3956,7 @@ with summary_placeholder:
         return "metric-mid"
 
     market_color_class = metric_color_class(performance_percentile)
+    financial_color_class = financial_metric_color_class(performance_percentile)
     amenity_color_class = metric_color_class(amenity_strength_score)
     property_score_color_class = property_score_color(overall_property_score)
 
@@ -4007,13 +4011,13 @@ with summary_placeholder:
         '<div class="insight-grid">'
         '<div class="insight-card">'
         '<div class="insight-title">Predicted adjusted RevPAR</div>'
-        f'<div class="insight-value {market_color_class}">${revpar:,.0f} / night</div>'
+        f'<div class="insight-value {financial_color_class}">${revpar:,.0f} / night</div>'
         f'<div class="prediction-delta">{sign}${abs(difference):,.0f} '
         f'({sign}{abs(difference_pct):.0f}%) {direction} the {selected_city_label} median.</div>'
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Typical revenue range</div>'
-        f'<div class="insight-value {market_color_class}">{interval_value}</div>'
+        f'<div class="insight-value {financial_color_class}">{interval_value}</div>'
         f'<div class="insight-detail">{escape(interval_detail)}</div>'
         '</div>'
         '<div class="insight-card">'
