@@ -806,8 +806,30 @@ st.markdown(
         }
 
         @media (max-width: 760px) {
+            /* Hide the entire Streamlit element wrapper, not only the Plotly
+               child. Hiding only the child leaves the chart's reserved height
+               behind as a large blank area on mobile. */
+            div[data-testid="stElementContainer"]:has(
+                div[data-testid="stPlotlyChart"]
+            ),
+            div.element-container:has(
+                div[data-testid="stPlotlyChart"]
+            ) {
+                display: none !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+            }
+
             div[data-testid="stPlotlyChart"] {
                 display: none !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
             }
 
             .mobile-factor-list {
