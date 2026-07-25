@@ -117,7 +117,7 @@ st.markdown(
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin: 0 auto .9rem auto;
+            margin: 0 auto .55rem auto;
         }
 
         .brand-logo {
@@ -129,7 +129,7 @@ st.markdown(
         }
 
         .brand-tagline {
-            margin-top: .12rem;
+            margin-top: .05rem;
             font-size: .92rem;
             font-weight: 500;
             color: inherit;
@@ -138,7 +138,7 @@ st.markdown(
         }
 
         .brand-parent {
-            margin-top: .2rem;
+            margin-top: .14rem;
             font-size: .7rem;
             font-weight: 650;
             letter-spacing: .8px;
@@ -158,9 +158,9 @@ st.markdown(
         .insight-card {
             box-sizing: border-box;
             min-width: 0;
-            min-height: 168px;
+            min-height: 144px;
             height: 100%;
-            padding: .95rem 1rem;
+            padding: .88rem .95rem;
             background: rgba(127, 127, 127, .08);
             color: inherit;
             border: 1px solid rgba(127, 127, 127, .28);
@@ -211,18 +211,19 @@ st.markdown(
             justify-content: space-between;
             gap: .45rem;
             margin: .24rem 0;
-            font-size: .72rem;
-            line-height: 1.3;
+            font-size: .78rem;
+            line-height: 1.32;
         }
 
         .score-stars {
             white-space: nowrap;
-            letter-spacing: .45px;
+            letter-spacing: .55px;
+            font-size: .82rem;
         }
 
         .revenue-hero-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.8fr) minmax(245px, .72fr);
+            grid-template-columns: minmax(0, 1.75fr) minmax(300px, .9fr);
             gap: 1rem;
             align-items: stretch;
         }
@@ -234,14 +235,14 @@ st.markdown(
         .property-score-panel {
             box-sizing: border-box;
             min-width: 0;
-            padding: .9rem 1rem;
+            padding: 1.05rem 1.15rem;
             background: rgba(127, 127, 127, .09);
             border: 1px solid rgba(127, 127, 127, .28);
             border-radius: 10px;
         }
 
         .property-score-value {
-            font-size: 1.75rem;
+            font-size: 1.95rem;
             font-weight: 800;
             line-height: 1.08;
             letter-spacing: -.45px;
@@ -341,7 +342,7 @@ st.markdown(
         }
 
         .revenue-main {
-            font-size: 2rem;
+            font-size: 2.18rem;
             font-weight: 800;
             line-height: 1.05;
             letter-spacing: -.5px;
@@ -406,11 +407,11 @@ st.markdown(
         .rule {
             border: none;
             border-top: 1px solid rgba(127, 127, 127, .28);
-            margin: 1.05rem 0 1.15rem 0;
+            margin: .8rem 0 .9rem 0;
         }
 
         .summary-bottom-space {
-            height: 1.35rem;
+            height: .65rem;
         }
 
         div[data-testid="stCheckbox"] label {
@@ -3623,7 +3624,7 @@ with summary_placeholder:
 
     def compact_percentile_display(value: float) -> str:
         if value < 1.0:
-            return "Below 1st"
+            return "Below 1st percentile"
         return percentile_label(value)
 
     score_rows = "".join(
@@ -3663,7 +3664,7 @@ with summary_placeholder:
         '<div class="insight-title">Property score</div>'
         f'<div class="property-score-value">{overall_property_score:.0f} / 100</div>'
         f'<ul class="score-list">{score_rows}</ul>'
-        '<div class="property-score-note">Average of four empirical category percentiles.</div>'
+        ''
         '</div>'
         '</div>'
         '</div>'
@@ -3690,12 +3691,12 @@ with summary_placeholder:
         '<div class="insight-card">'
         '<div class="insight-title">Market percentile</div>'
         f'<div class="insight-value insight-value-positive">{compact_percentile_display(performance_percentile)}</div>'
-        f'<div class="insight-detail">Performance relative to {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
+        f'<div class="insight-detail">Performance relative to {escape(reference_group_label)}.</div>'
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Amenity strength percentile</div>'
         f'<div class="insight-value insight-value-positive">{compact_percentile_display(amenity_strength_score)}</div>'
-        f'<div class="insight-detail">Amenity contribution relative to {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
+        f'<div class="insight-detail">Amenity contribution relative to {escape(reference_group_label)}.</div>'
         '</div>'
         '</div>'
     )
