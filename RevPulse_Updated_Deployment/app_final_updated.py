@@ -324,20 +324,32 @@ st.markdown(
 
         div[data-testid="stSegmentedControl"] {
             width: 100%;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
         }
 
-        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {
-            justify-content: center;
-            gap: 0;
+        div[data-testid="stSegmentedControl"] > label {
+            align-self: center !important;
+        }
+
+        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"],
+        div[data-testid="stSegmentedControl"] [role="radiogroup"] {
+            justify-content: center !important;
+            gap: 0 !important;
+            width: fit-content !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
             border: 1px solid rgba(127, 127, 127, .30);
             border-radius: 999px;
             padding: 4px;
             background: rgba(127, 127, 127, .045);
         }
 
-        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button {
+        div[data-testid="stSegmentedControl"] button,
+        div[data-testid="stSegmentedControl"] [role="radio"] {
             border-radius: 999px !important;
-            border: none !important;
+            border-color: transparent !important;
             color: rgba(255,255,255,.78) !important;
             background: transparent !important;
             box-shadow: none !important;
@@ -345,13 +357,32 @@ st.markdown(
             font-weight: 600;
         }
 
-        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-pressed="true"] {
-            background: rgba(47, 158, 98, .16) !important;
+        div[data-testid="stSegmentedControl"] button[aria-pressed="true"],
+        div[data-testid="stSegmentedControl"] button[aria-checked="true"],
+        div[data-testid="stSegmentedControl"] button[data-selected="true"],
+        div[data-testid="stSegmentedControl"] [role="radio"][aria-checked="true"] {
+            background: rgba(47, 158, 98, .18) !important;
             color: #2f9e62 !important;
-            box-shadow: inset 0 0 0 1px rgba(47, 158, 98, .65) !important;
+            border-color: #2f9e62 !important;
+            box-shadow: inset 0 0 0 1px rgba(47, 158, 98, .72) !important;
         }
 
-        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button:hover {
+
+        div[data-testid="stSegmentedControl"] label:has(input:checked) {
+            background: rgba(47, 158, 98, .18) !important;
+            color: #2f9e62 !important;
+            border-color: #2f9e62 !important;
+            box-shadow: inset 0 0 0 1px rgba(47, 158, 98, .72) !important;
+        }
+
+        div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > div:first-child,
+        div[data-testid="stCheckbox"] label:has(input:checked) > div:first-child {
+            background-color: #2f9e62 !important;
+            border-color: #2f9e62 !important;
+        }
+
+        div[data-testid="stSegmentedControl"] button:hover,
+        div[data-testid="stSegmentedControl"] [role="radio"]:hover {
             color: #f2f4f8 !important;
         }
 
@@ -4107,7 +4138,7 @@ display_toggle_help = (
 if "factor_display_mode" not in st.session_state:
     st.session_state["factor_display_mode"] = "Key Factors"
 
-toggle_left, toggle_center, toggle_right = st.columns([1, 1.2, 1])
+toggle_left, toggle_center, toggle_right = st.columns([1, 0.5, 1])
 with toggle_center:
     if hasattr(st, "segmented_control"):
         st.segmented_control(
