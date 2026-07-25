@@ -3664,9 +3664,16 @@ with summary_placeholder:
             return "metric-high"
         return "metric-mid"
 
+    def property_score_color(value: float) -> str:
+        if value < 40.0:
+            return "metric-low"
+        if value >= 70.0:
+            return "metric-high"
+        return "metric-mid"
+
     market_color_class = metric_color_class(performance_percentile)
     amenity_color_class = metric_color_class(amenity_strength_score)
-    property_score_color_class = metric_color_class(overall_property_score)
+    property_score_color_class = property_score_color(overall_property_score)
 
     score_rows = "".join(
         f'<li><span>{escape(display_label)}</span>'
