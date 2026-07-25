@@ -3019,7 +3019,7 @@ if logo_data_uri:
             <div class="brand-tagline">
                 Your pulse on the short-term rental market.
             </div>
-            <div class="brand-parent">Powered by AirROI</div>
+            <div class="brand-parent">Powered by AirROI · build 8.2</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -3032,7 +3032,7 @@ else:
             <div class="brand-tagline">
                 Your pulse on the short-term rental market.
             </div>
-            <div class="brand-parent">Powered by AirROI</div>
+            <div class="brand-parent">Powered by AirROI · build 8.2</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -4181,7 +4181,7 @@ st.caption(
 st.markdown(
     f"""
     <div class="footer">
-        RevPulse build 8.1 &nbsp;|&nbsp;
+        RevPulse build 8.2 &nbsp;|&nbsp;
         Elastic Net alpha: {bundle["model"].alpha_:.5f}
         &nbsp;|&nbsp; L1 ratio: {bundle["model"].l1_ratio_:.2f}
         &nbsp;|&nbsp; {len(bundle["feature_names"])} predictors
