@@ -625,6 +625,83 @@ st.markdown(
             border-top: 1px solid rgba(127, 127, 127, .28);
         }
 
+
+        /* RevPulse selection states: use brand green instead of Streamlit red. */
+        :root {
+            --st-primary-color: #2f9e62 !important;
+            --primary-color: #2f9e62 !important;
+        }
+
+        /* Center the Display label directly above its segmented control. */
+        div[data-testid="stButtonGroup"] {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        div[data-testid="stButtonGroup"] [data-testid="stWidgetLabel"],
+        div[data-testid="stButtonGroup"] > label,
+        div[data-testid="stButtonGroup"] > div:first-child {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            text-align: center !important;
+        }
+
+        div[data-testid="stButtonGroup"] [data-baseweb="button-group"] {
+            width: fit-content !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        /* Streamlit renders segmented controls as stButtonGroup, not stSegmentedControl. */
+        div[data-testid="stButtonGroup"] button[aria-checked="true"],
+        div[data-testid="stButtonGroup"] [role="radio"][aria-checked="true"] {
+            background: rgba(47, 158, 98, .18) !important;
+            color: #2f9e62 !important;
+            border-color: #2f9e62 !important;
+            box-shadow: inset 0 0 0 1px #2f9e62 !important;
+        }
+
+        div[data-testid="stButtonGroup"] button[aria-checked="true"] *,
+        div[data-testid="stButtonGroup"] [role="radio"][aria-checked="true"] * {
+            color: #2f9e62 !important;
+            fill: #2f9e62 !important;
+        }
+
+        /* Native and BaseWeb checkbox fallbacks across Streamlit versions. */
+        div[data-testid="stCheckbox"] input[type="checkbox"] {
+            accent-color: #2f9e62 !important;
+        }
+
+        div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > span:first-child,
+        div[data-testid="stCheckbox"] label[data-baseweb="checkbox"]:has(input:checked) > div:first-child,
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) > span:first-child,
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) > div:first-child {
+            background-color: #2f9e62 !important;
+            border-color: #2f9e62 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) svg,
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) svg * {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+
+        /* Keep the post-click focus state of amenity action buttons on-brand. */
+        div[data-testid="stButton"] button:focus,
+        div[data-testid="stButton"] button:focus-visible {
+            border-color: #2f9e62 !important;
+            color: #2f9e62 !important;
+            box-shadow: 0 0 0 1px #2f9e62 !important;
+            outline-color: #2f9e62 !important;
+        }
+
         @media (max-width: 760px) {
             .block-container {
                 padding-left: 1rem;
