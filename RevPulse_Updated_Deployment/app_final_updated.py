@@ -4581,9 +4581,19 @@ with st.expander(
         """
 ### What is adjusted TTM RevPAR?
 
-TTM means **trailing 12 months**, while RevPAR means **revenue per available rental night**. RevPAR combines pricing and occupancy into one measure of listing performance. The prediction represents estimated daily revenue performance based on the adjusted TTM RevPAR measure in the source data.
+TTM means **trailing 12 months**, while RevPAR means **revenue per available room**. RevPAR combines average rate and occupancy into one measure of revenue performance. The model predicts adjusted TTM RevPAR on a daily basis using the measure provided in the source data.
 
-The annualized figure shown in the app is calculated as predicted RevPAR multiplied by 365. It should not be interpreted as profit, cash flow, or a complete investment return.
+The annualized figure shown in the app is calculated as predicted daily RevPAR multiplied by 365. It should not be interpreted as profit, cash flow, or a complete investment return.
+
+### How was the model developed?
+
+RevPulse was built from **2,128 cleaned and deduplicated historical short-term-rental listings** across ten modeled markets. Target-derived `ttm_*` fields were excluded from the predictors to prevent outcome leakage. The final feature matrix contains **40 predictors** describing market, property category and capacity, listing setup, policies, fees, check-in and checkout windows, and grouped amenity coverage.
+
+Adjusted TTM RevPAR was modeled as `log1p(RevPAR)` to reduce the influence of the target's right skew. The data were stratified by location type into **80% training data** (1,702 listings), **10% validation data** (213), and an **untouched 10% test set** (213). Median imputation and standardization were fit only on the training data. Elastic Net hyperparameters were selected through five-fold cross-validation within the training set, while the validation set was used for model comparison and selection. The test set was not evaluated until the final model specification had been locked.
+
+### How did the final model perform?
+
+On the untouched test set, the final Elastic Net achieved an **R² of 0.3891** on the log-transformed target. This means it explained approximately **38.9% of the variation in held-out adjusted TTM RevPAR on that scale**. Its test mean squared error was **0.5068** in log space. These are out-of-sample results rather than in-sample fit statistics.
 
 ### What is Elastic Net?
 
@@ -4591,21 +4601,21 @@ Elastic Net is a regression method that combines Ridge and Lasso regularization.
 
 ### Why was this model selected?
 
-We evaluated several predictive approaches, including Random Forest, XGBoost, Adaptive Lasso, and Elastic Net. Although the ensemble models achieved somewhat higher validation performance, Elastic Net provided the strongest balance of predictive usefulness, interpretability, and application functionality.
+We evaluated Elastic Net, Adaptive Lasso, Random Forest, and XGBoost using the validation data. Although the tree-based models achieved somewhat higher validation scores, Elastic Net provided the strongest balance of predictive usefulness, interpretability, and application functionality.
 
-Its transparent structure allows the app to explain individual predictions and evaluate potential listing changes.
+Its transparent structure allows the app to explain individual predictions, group feature contributions into meaningful categories, and evaluate potential listing changes.
 
 ### How is the revenue prediction range calculated?
 
-The displayed range is the **middle 50% out-of-sample prediction range**, calibrated from nested five-fold cross-validation errors on 2,128 historical listings. It is intentionally presented as a typical range rather than a broad high-coverage interval. The app uses the most specific reliable calibration group available: selected city and property type when there are at least 30 validation rows, then city, then the global validation sample.
+After the final model had been selected and evaluated on the untouched test set, the production calibration process generated nested out-of-fold predictions using **five outer folds and five inner folds** across the full 2,128-listing modeling sample. The displayed range is the **middle 50% empirical out-of-sample prediction range** derived from those errors. It is intentionally presented as a typical range rather than a broad high-coverage interval.
 
-Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated symmetrically around the prediction in log space and transformed back to dollars. This creates the appropriate asymmetric dollar range. The annual range is the resulting lower and upper RevPAR bounds multiplied by 365.
+The app uses the most specific reliable calibration group available: selected city and property type when there are at least 30 validation rows, then city, then the global validation sample. Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated symmetrically around the prediction in log space and transformed back to dollars. This produces an appropriately asymmetric dollar range. The annual range is the resulting lower and upper RevPAR bounds multiplied by 365.
 
-### How are the Property Score and amenity strength percentile calculated?
+### How are the Property Score and Amenity Package calculated?
 
-The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Setup are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Internally, the validation export retains the original `Listing Quality` category name, but the interface labels it **Listing Setup** because it reflects capacity, photo count, and property type rather than subjective quality. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
+The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Setup are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city and property reference group. Internally, the validation export retains the original `Listing Quality` category name, but the interface labels it **Listing Setup** because it reflects capacity, photo count, and property type rather than subjective quality. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
 
-The overall Property Score is the simple average of those four category percentiles. The amenity card shows the current listing's **amenity strength percentile** directly. Potential amenity improvements remain in the separate listing-improvements section, where each change is tested by rerunning the fitted model one input at a time.
+The overall Property Score is the simple average of those four category percentiles. The Amenity Package card shows the current listing's amenity-contribution percentile directly. Potential amenity improvements remain in the separate listing-improvements section, where each candidate change is evaluated with the fitted model.
 
 ### How are comparable properties selected?
 
@@ -4618,7 +4628,7 @@ The application allows users to:
 - Estimate a listing's adjusted RevPAR
 - Compare the estimate with the selected city's median
 - See which characteristics most influence the prediction
-- Explore potential improvements by changing listing features one at a time
+- Explore potential improvements to listing features and settings
 - View historical comparable listings with similar model characteristics
 
 ### How should the results be interpreted?
@@ -4654,6 +4664,7 @@ st.markdown(
         Elastic Net alpha: {bundle["model"].alpha_:.5f}
         &nbsp;|&nbsp; L1 ratio: {bundle["model"].l1_ratio_:.2f}
         &nbsp;|&nbsp; {len(bundle["feature_names"])} predictors
+        &nbsp;|&nbsp; Test R² (log target): 0.3891
         &nbsp;|&nbsp; scikit-learn {stored_version}
     </div>
     """,
