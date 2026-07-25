@@ -1,0 +1,41 @@
+feature,category
+photos_count,Listing Quality
+guests,Listing Quality
+bedrooms,Listing Quality
+beds,Listing Quality
+baths,Listing Quality
+min_nights,Policies
+cleaning_fee,Policies
+extra_guest_fee,Policies
+is_destination,Market
+AmenityGroup_Property_Readiness,Amenities
+AmenityGroup_Access_Convenience,Amenities
+AmenityGroup_Leisure_Destination,Amenities
+AmenityGroup_Family_Flexibility,Amenities
+AmenityStandalone_Beach_Access,Amenities
+AmenityStandalone_Hot_Tub,Amenities
+Checkin_Time_Unknown,Policies
+Checkout_Time_Unknown,Policies
+Checkin_Nonstandard_Time,Policies
+Checkout_Nonstandard_Time,Policies
+PropertyType__hotel_or_hosted_lodging,Listing Quality
+PropertyType__other_specialty,Listing Quality
+PropertyType__private_room,Listing Quality
+City__asheville,Market
+City__carolina_beach,Market
+City__charlotte,Market
+City__durham,Market
+City__gatlinburg,Market
+City__pigeon_forge,Market
+City__raleigh,Market
+City__williamsburg,Market
+City__wilmington,Market
+instant_book_True,Policies
+cancellation_policy_Flexible,Policies
+cancellation_policy_Limited,Policies
+cancellation_policy_Moderate,Policies
+cancellation_policy_Strict,Policies
+cancellation_policy_Super Strict 30 Days,Policies
+cancellation_policy_Super Strict 60 Days,Policies
+exact_location_True,Policies
+single_fee_structure_True,Policies

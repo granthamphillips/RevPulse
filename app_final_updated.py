@@ -4,6 +4,10 @@ RevPulse Streamlit predictor for the fitted Elastic Net model.
 Required files in the same directory:
     elastic_net_streamlit_bundle.pkl
     airroi_comparables.csv
+    revpulse_interval_calibration.csv
+    revpulse_property_score_reference.csv
+    revpulse_market_score_reference.csv
+    revpulse_feature_category_map.csv
 
 The bundle must contain the fitted model, imputer, scaler, training feature
 schema, category metadata, and amenity group definitions. Use the companion
@@ -32,6 +36,10 @@ APP_DIR = Path(__file__).resolve().parent
 BUNDLE_PATH = APP_DIR / "elastic_net_streamlit_bundle.pkl"
 COMPARABLES_PATH = APP_DIR / "airroi_comparables.csv"
 LOGO_PATH = APP_DIR / "revpulse_logo.png"
+INTERVAL_CALIBRATION_PATH = APP_DIR / "revpulse_interval_calibration.csv"
+PROPERTY_SCORE_REFERENCE_PATH = APP_DIR / "revpulse_property_score_reference.csv"
+MARKET_SCORE_REFERENCE_PATH = APP_DIR / "revpulse_market_score_reference.csv"
+FEATURE_CATEGORY_MAP_PATH = APP_DIR / "revpulse_feature_category_map.csv"
 
 COLOR_POSITIVE = "#2f9e62"
 COLOR_NEGATIVE = "#b83232"
@@ -98,6 +106,88 @@ st.markdown(
             color: inherit;
             opacity: .72;
             letter-spacing: .05px;
+        }
+
+        .brand-parent {
+            margin-top: .35rem;
+            font-size: .7rem;
+            font-weight: 650;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: inherit;
+            opacity: .56;
+        }
+
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .9rem;
+            margin: 1rem 0 .1rem 0;
+            align-items: stretch;
+        }
+
+        .insight-card {
+            box-sizing: border-box;
+            min-width: 0;
+            height: 100%;
+            padding: .95rem 1rem;
+            background: rgba(127, 127, 127, .08);
+            color: inherit;
+            border: 1px solid rgba(127, 127, 127, .28);
+            border-radius: 11px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .08);
+        }
+
+        .insight-title {
+            font-size: .66rem;
+            font-weight: 700;
+            letter-spacing: .85px;
+            text-transform: uppercase;
+            color: inherit;
+            opacity: .64;
+            margin-bottom: .4rem;
+        }
+
+        .insight-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -.35px;
+            color: inherit;
+            overflow-wrap: anywhere;
+        }
+
+        .insight-value-positive {
+            color: #2f9e62;
+        }
+
+        .insight-detail {
+            font-size: .72rem;
+            line-height: 1.42;
+            color: inherit;
+            opacity: .70;
+            margin-top: .38rem;
+            overflow-wrap: anywhere;
+        }
+
+        .score-list {
+            list-style: none;
+            margin: .6rem 0 0 0;
+            padding: 0;
+        }
+
+        .score-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: .45rem;
+            margin: .24rem 0;
+            font-size: .72rem;
+            line-height: 1.3;
+        }
+
+        .score-stars {
+            white-space: nowrap;
+            letter-spacing: .45px;
         }
 
         div[data-testid="stExpander"] details {
@@ -352,6 +442,10 @@ st.markdown(
                 grid-template-columns: 1fr;
             }
 
+            .insight-grid {
+                grid-template-columns: 1fr;
+            }
+
             .opportunity-grid {
                 grid-template-columns: 1fr;
             }
@@ -515,6 +609,232 @@ def load_comparables(path: Path) -> pd.DataFrame:
     return comparables.reset_index(
         drop=True
     )
+
+
+@st.cache_data
+def load_validation_table(
+    path: Path,
+    required_columns: tuple[str, ...],
+) -> pd.DataFrame:
+    """Load a validation export and return an empty frame if it is unusable."""
+    if not path.exists():
+        return pd.DataFrame()
+
+    try:
+        frame = pd.read_csv(path, low_memory=False)
+    except Exception:
+        return pd.DataFrame()
+
+    if not set(required_columns).issubset(frame.columns):
+        return pd.DataFrame()
+
+    return frame
+
+
+def percentile_rank(
+    reference_values: pd.Series,
+    value: float,
+) -> float:
+    """Return a mid-rank empirical percentile on a 0-100 scale."""
+    values = pd.to_numeric(reference_values, errors="coerce").dropna()
+    if values.empty or not np.isfinite(value):
+        return 50.0
+
+    below = float((values < value).sum())
+    equal = float((values == value).sum())
+    return float(np.clip(100.0 * (below + 0.5 * equal) / len(values), 0.0, 100.0))
+
+
+def percentile_label(value: float) -> str:
+    rounded = int(np.clip(round(value), 0, 100))
+    if 10 <= rounded % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(rounded % 10, "th")
+    return f"{rounded}{suffix} percentile"
+
+
+def percentile_stars(value: float) -> str:
+    filled = int(np.clip(np.ceil(value / 20.0), 1, 5))
+    return "★" * filled + "☆" * (5 - filled)
+
+
+def choose_reference_group(
+    property_reference: pd.DataFrame,
+    selected_city: str,
+    selected_property: str,
+    minimum_exact_rows: int = 20,
+) -> tuple[pd.DataFrame, str]:
+    """Prefer city/property peers, then city peers, then the global sample."""
+    if property_reference.empty:
+        return property_reference.copy(), "historical listings"
+
+    exact = property_reference.loc[
+        property_reference["city"].eq(selected_city)
+        & property_reference["property_type_group"].eq(selected_property)
+    ].copy()
+
+    if len(exact) >= minimum_exact_rows:
+        return exact, (
+            f"{pretty_label(selected_city)} "
+            f"{pretty_label(selected_property).lower()} listings"
+        )
+
+    city_rows = property_reference.loc[
+        property_reference["city"].eq(selected_city)
+    ].copy()
+
+    if len(city_rows) >= minimum_exact_rows:
+        return city_rows, f"{pretty_label(selected_city)} listings"
+
+    return property_reference.copy(), "all historical listings"
+
+
+def select_interval_row(
+    interval_calibration: pd.DataFrame,
+    selected_city: str,
+    selected_property: str,
+) -> pd.Series | None:
+    """Use the most specific conformal calibration group with adequate data."""
+    if interval_calibration.empty:
+        return None
+
+    exact = interval_calibration.loc[
+        interval_calibration["scope"].eq("city_property")
+        & interval_calibration["city"].eq(selected_city)
+        & interval_calibration["property_type_group"].eq(selected_property)
+        & interval_calibration["n"].ge(30)
+    ]
+    if not exact.empty:
+        return exact.iloc[0]
+
+    city = interval_calibration.loc[
+        interval_calibration["scope"].eq("city")
+        & interval_calibration["city"].eq(selected_city)
+    ]
+    if not city.empty:
+        return city.iloc[0]
+
+    global_rows = interval_calibration.loc[
+        interval_calibration["scope"].eq("global")
+    ]
+    if not global_rows.empty:
+        return global_rows.iloc[0]
+
+    return None
+
+
+def conformal_prediction_range(
+    predicted_revpar: float,
+    interval_row: pd.Series | None,
+    coverage: int = 80,
+) -> tuple[float, float, float, int] | None:
+    """Create an asymmetric log-scale conformal prediction interval."""
+    if interval_row is None or predicted_revpar < 0:
+        return None
+
+    quantile_column = f"q{coverage}_log"
+    empirical_column = f"empirical_{coverage}_coverage"
+    if quantile_column not in interval_row.index:
+        return None
+
+    quantile = float(interval_row[quantile_column])
+    predicted_log = float(np.log1p(predicted_revpar))
+    lower = max(0.0, float(np.expm1(predicted_log - quantile)))
+    upper = max(lower, float(np.expm1(predicted_log + quantile)))
+    empirical_coverage = float(interval_row.get(empirical_column, coverage / 100.0))
+    sample_size = int(interval_row.get("n", 0))
+    return lower, upper, empirical_coverage, sample_size
+
+
+def current_category_contributions(
+    raw_contribution_df: pd.DataFrame,
+    feature_category_map: pd.DataFrame,
+) -> dict[str, float]:
+    """Sum the fitted model's log-scale contributions into product categories."""
+    if raw_contribution_df.empty or feature_category_map.empty:
+        return {}
+
+    merged = raw_contribution_df.merge(
+        feature_category_map,
+        how="left",
+        left_on="Feature",
+        right_on="feature",
+    )
+
+    category_totals = (
+        merged.dropna(subset=["category"])
+        .groupby("category")["Contribution"]
+        .sum()
+    )
+
+    return {
+        str(category): float(value)
+        for category, value in category_totals.items()
+    }
+
+
+def build_data_backed_scores(
+    selected_city: str,
+    reference_group: pd.DataFrame,
+    market_reference: pd.DataFrame,
+    category_contributions: dict[str, float],
+    predicted_revpar: float,
+) -> dict[str, float]:
+    """Calculate transparent empirical percentile scores from validation data."""
+    market_percentile = 50.0
+    if not market_reference.empty:
+        city_row = market_reference.loc[
+            market_reference["city"].eq(selected_city)
+        ]
+        if not city_row.empty:
+            market_percentile = float(city_row.iloc[0]["market_percentile"])
+
+    amenities_percentile = percentile_rank(
+        reference_group.get(
+            "amenities_contribution_log",
+            pd.Series(dtype=float),
+        ),
+        category_contributions.get("Amenities", 0.0),
+    )
+    policies_percentile = percentile_rank(
+        reference_group.get(
+            "policies_contribution_log",
+            pd.Series(dtype=float),
+        ),
+        category_contributions.get("Policies", 0.0),
+    )
+    listing_quality_percentile = percentile_rank(
+        reference_group.get(
+            "listing_quality_contribution_log",
+            pd.Series(dtype=float),
+        ),
+        category_contributions.get("Listing Quality", 0.0),
+    )
+    performance_percentile = percentile_rank(
+        reference_group.get(
+            "actual_adjusted_revpar",
+            pd.Series(dtype=float),
+        ),
+        predicted_revpar,
+    )
+
+    overall_score = float(np.mean([
+        market_percentile,
+        amenities_percentile,
+        policies_percentile,
+        listing_quality_percentile,
+    ]))
+
+    return {
+        "Market": market_percentile,
+        "Amenities": amenities_percentile,
+        "Policies": policies_percentile,
+        "Listing Quality": listing_quality_percentile,
+        "Performance Percentile": performance_percentile,
+        "Overall": overall_score,
+        "Amenity Opportunity": 100.0 - amenities_percentile,
+    }
 
 
 def comparable_property_group(
@@ -2626,6 +2946,58 @@ if stored_version != "unknown" and stored_version != sklearn.__version__:
         "Pin the saved version in requirements.txt."
     )
 
+interval_calibration = load_validation_table(
+    INTERVAL_CALIBRATION_PATH,
+    (
+        "scope",
+        "city",
+        "property_type_group",
+        "n",
+        "q80_log",
+        "q90_log",
+        "empirical_80_coverage",
+        "empirical_90_coverage",
+    ),
+)
+
+property_score_reference = load_validation_table(
+    PROPERTY_SCORE_REFERENCE_PATH,
+    (
+        "city",
+        "property_type_group",
+        "actual_adjusted_revpar",
+        "amenities_contribution_log",
+        "policies_contribution_log",
+        "listing_quality_contribution_log",
+    ),
+)
+
+market_score_reference = load_validation_table(
+    MARKET_SCORE_REFERENCE_PATH,
+    (
+        "city",
+        "market_percentile",
+    ),
+)
+
+feature_category_map = load_validation_table(
+    FEATURE_CATEGORY_MAP_PATH,
+    (
+        "feature",
+        "category",
+    ),
+)
+
+validation_exports_ready = all(
+    not frame.empty
+    for frame in [
+        interval_calibration,
+        property_score_reference,
+        market_score_reference,
+        feature_category_map,
+    ]
+)
+
 logo_data_uri = ""
 if LOGO_PATH.exists():
     logo_data_uri = (
@@ -2647,6 +3019,7 @@ if logo_data_uri:
             <div class="brand-tagline">
                 Your pulse on the short-term rental market.
             </div>
+            <div class="brand-parent">Powered by AirROI</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -2659,6 +3032,7 @@ else:
             <div class="brand-tagline">
                 Your pulse on the short-term rental market.
             </div>
+            <div class="brand-parent">Powered by AirROI</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -3074,6 +3448,49 @@ actionable_opportunities = (
     )
 )
 
+reference_group, reference_group_label = choose_reference_group(
+    property_reference=property_score_reference,
+    selected_city=selected_city,
+    selected_property=selected_property,
+)
+
+interval_row = select_interval_row(
+    interval_calibration=interval_calibration,
+    selected_city=selected_city,
+    selected_property=selected_property,
+)
+
+prediction_range = conformal_prediction_range(
+    predicted_revpar=revpar,
+    interval_row=interval_row,
+    coverage=80,
+)
+
+category_contributions = current_category_contributions(
+    raw_contribution_df=raw_contribution_df,
+    feature_category_map=feature_category_map,
+)
+
+property_scores = build_data_backed_scores(
+    selected_city=selected_city,
+    reference_group=reference_group,
+    market_reference=market_score_reference,
+    category_contributions=category_contributions,
+    predicted_revpar=revpar,
+)
+
+amenity_actions = [
+    opportunity
+    for opportunity in actionable_opportunities
+    if "amenity" in str(opportunity.get("Category", "")).lower()
+]
+
+top_amenity_action = (
+    max(amenity_actions, key=lambda item: item["Uplift"])
+    if amenity_actions
+    else None
+)
+
 
 # ============================================================
 # RENDER PREDICTION SUMMARY IN THE RESERVED TOP POSITION
@@ -3085,44 +3502,62 @@ with summary_placeholder:
         unsafe_allow_html=True,
     )
 
+    annualized_revenue = revpar * 365
+    monthly_revenue = annualized_revenue / 12
+    city_median_annualized_revenue = selected_city_median * 365
+
     summary_left, summary_right = st.columns(
-        [0.72, 1.28],
+        [1.28, 0.72],
         gap="large",
         vertical_alignment="center",
     )
 
     with summary_left:
+        revenue_card_html = (
+            f'<div class="revenue-card">'
+            f'<div class="revenue-eyebrow">Annualized revenue potential</div>'
+            f'<div class="revenue-main">${annualized_revenue:,.0f}</div>'
+            f'<div class="revenue-sub">Adjusted RevPAR × 365 available nights</div>'
+            f'<div class="revenue-grid">'
+            f'<div class="revenue-stat">'
+            f'<div class="revenue-stat-value">${monthly_revenue:,.0f}</div>'
+            f'<div class="revenue-stat-label">Monthly equivalent</div>'
+            f'</div>'
+            f'<div class="revenue-stat">'
+            f'<div class="revenue-stat-value">${city_median_annualized_revenue:,.0f}</div>'
+            f'<div class="revenue-stat-label">{selected_city_label} median annualized</div>'
+            f'</div>'
+            f'</div>'
+            f'<div class="revenue-context">'
+            f'{pretty_label(selected_property)} in {pretty_label(selected_city)} · '
+            f'occupancy-adjusted estimate, not gross booking revenue'
+            f'</div>'
+            f'</div>'
+        )
 
+        st.markdown(
+            revenue_card_html,
+            unsafe_allow_html=True,
+        )
+
+    with summary_right:
         st.markdown(
             '<div class="section-label">Prediction</div>',
             unsafe_allow_html=True,
         )
 
         st.markdown(
-            f'<div class="hero-value">'
-            f'${revpar:,.0f}'
-            f'</div>',
+            f'<div class="hero-value">${revpar:,.0f}</div>',
             unsafe_allow_html=True,
         )
 
         st.markdown(
-            '<div class="hero-label">'
-            'Predicted adjusted RevPAR per night'
-            '</div>',
+            '<div class="hero-label">Predicted adjusted RevPAR per night</div>',
             unsafe_allow_html=True,
         )
 
-        direction = (
-            "above"
-            if difference >= 0
-            else "below"
-        )
-
-        sign = (
-            "+"
-            if difference >= 0
-            else "-"
-        )
+        direction = "above" if difference >= 0 else "below"
+        sign = "+" if difference >= 0 else "-"
 
         st.markdown(
             f'<div class="hero-context">'
@@ -3133,62 +3568,87 @@ with summary_placeholder:
             unsafe_allow_html=True,
         )
 
+    if prediction_range is not None:
+        (
+            lower_revpar,
+            upper_revpar,
+            empirical_coverage,
+            interval_sample_size,
+        ) = prediction_range
+        lower_annual = lower_revpar * 365
+        upper_annual = upper_revpar * 365
+        interval_value = f'${lower_annual:,.0f} – ${upper_annual:,.0f}'
+        interval_detail = (
+            f'80% out-of-sample predicted range · '
+            f'{empirical_coverage * 100:.1f}% observed calibration coverage '
+            f'across {interval_sample_size:,} validation rows.'
+        )
+    else:
+        interval_value = 'Unavailable'
+        interval_detail = 'Add the RevPulse validation export files to calculate this range.'
 
-    with summary_right:
+    performance_percentile = property_scores.get("Performance Percentile", 50.0)
+    amenity_opportunity_score = property_scores.get("Amenity Opportunity", 50.0)
+    overall_property_score = property_scores.get("Overall", 50.0)
 
-        annualized_revenue = (
-            revpar * 365
+    if top_amenity_action is not None:
+        amenity_detail = (
+            f'{percentile_label(property_scores.get("Amenities", 50.0))} amenity position. '
+            f'Top tested move: {escape(str(top_amenity_action["Title"]))} '
+            f'(+${top_amenity_action["Uplift"]:,.1f}/night).'
+        )
+    else:
+        amenity_detail = (
+            f'{percentile_label(property_scores.get("Amenities", 50.0))} amenity position. '
+            f'No positive one-step amenity change was identified.'
         )
 
-        monthly_revenue = (
-            annualized_revenue / 12
-        )
+    score_rows = "".join(
+        f'<li><span>{escape(label)}</span>'
+        f'<span class="score-stars">{percentile_stars(property_scores.get(label, 50.0))}</span></li>'
+        for label in [
+            "Market",
+            "Amenities",
+            "Policies",
+            "Listing Quality",
+        ]
+    )
 
-        city_median_annualized_revenue = (
-            selected_city_median * 365
-        )
+    insight_cards_html = (
+        '<div class="insight-grid">'
+        '<div class="insight-card">'
+        '<div class="insight-title">Revenue prediction range</div>'
+        f'<div class="insight-value">{interval_value}</div>'
+        f'<div class="insight-detail">{escape(interval_detail)}</div>'
+        '</div>'
+        '<div class="insight-card">'
+        '<div class="insight-title">Market percentile</div>'
+        f'<div class="insight-value insight-value-positive">{performance_percentile:.0f}th</div>'
+        f'<div class="insight-detail">Predicted RevPAR versus actual historical performance among {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
+        '</div>'
+        '<div class="insight-card">'
+        '<div class="insight-title">Amenity opportunity score</div>'
+        f'<div class="insight-value insight-value-positive">{amenity_opportunity_score:.0f} / 100</div>'
+        f'<div class="insight-detail">{amenity_detail}</div>'
+        '</div>'
+        '<div class="insight-card">'
+        '<div class="insight-title">Property score</div>'
+        f'<div class="insight-value">{overall_property_score:.0f} / 100</div>'
+        f'<ul class="score-list">{score_rows}</ul>'
+        f'<div class="insight-detail">Average of four empirical category percentiles.</div>'
+        '</div>'
+        '</div>'
+    )
 
-        revenue_card_html = (
-            f'<div class="revenue-card">'
-            f'<div class="revenue-eyebrow">'
-            f'Annualized revenue potential'
-            f'</div>'
-            f'<div class="revenue-main">'
-            f'${annualized_revenue:,.0f}'
-            f'</div>'
-            f'<div class="revenue-sub">'
-            f'Adjusted RevPAR × 365 available nights'
-            f'</div>'
-            f'<div class="revenue-grid">'
-            f'<div class="revenue-stat">'
-            f'<div class="revenue-stat-value">'
-            f'${monthly_revenue:,.0f}'
-            f'</div>'
-            f'<div class="revenue-stat-label">'
-            f'Monthly equivalent'
-            f'</div>'
-            f'</div>'
-            f'<div class="revenue-stat">'
-            f'<div class="revenue-stat-value">'
-            f'${city_median_annualized_revenue:,.0f}'
-            f'</div>'
-            f'<div class="revenue-stat-label">'
-            f'{selected_city_label} median annualized'
-            f'</div>'
-            f'</div>'
-            f'</div>'
-            f'<div class="revenue-context">'
-            f'{pretty_label(selected_property)} '
-            f'in {pretty_label(selected_city)} · '
-            f'occupancy-adjusted estimate, '
-            f'not gross booking revenue'
-            f'</div>'
-            f'</div>'
-        )
+    st.markdown(
+        insight_cards_html,
+        unsafe_allow_html=True,
+    )
 
-        st.markdown(
-            revenue_card_html,
-            unsafe_allow_html=True,
+    if not validation_exports_ready:
+        st.warning(
+            "One or more RevPulse validation export files are missing. "
+            "The new interval and score cards cannot be fully calculated."
         )
 
     st.markdown(
@@ -3668,6 +4128,18 @@ Elastic Net is a regression method that combines Ridge and Lasso regularization.
 We evaluated several predictive approaches, including Random Forest, XGBoost, Adaptive Lasso, and Elastic Net. Although the ensemble models achieved somewhat higher validation performance, Elastic Net provided the strongest balance of predictive usefulness, interpretability, and application functionality.
 
 Its transparent structure allows the app to explain individual predictions and evaluate potential listing changes.
+
+### How is the revenue prediction range calculated?
+
+The displayed range is an **80% out-of-sample prediction interval**, not a hand-selected confidence band. It is calibrated from nested five-fold cross-validation errors on 2,128 historical listings. The app uses the most specific reliable calibration group available: selected city and property type when there are at least 30 validation rows, then city, then the global validation sample.
+
+Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated symmetrically around the prediction in log space and transformed back to dollars. This creates the appropriate asymmetric dollar range. The annual range is the resulting lower and upper RevPAR bounds multiplied by 365.
+
+### How are the Property Score and amenity opportunity score calculated?
+
+The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Quality are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
+
+The overall Property Score is the simple average of those four category percentiles. The amenity opportunity score is `100 - the current amenities percentile`, so a higher score means the listing's amenity contribution has more room to improve relative to comparable historical properties. The dollar uplift shown with an amenity recommendation still comes from rerunning the fitted model one change at a time.
 
 ### How can this tool help?
 
