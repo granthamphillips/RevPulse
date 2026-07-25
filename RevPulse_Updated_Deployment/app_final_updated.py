@@ -223,21 +223,22 @@ st.markdown(
         .score-list li {
             display: flex;
             justify-content: space-between;
-            gap: .45rem;
-            margin: .24rem 0;
-            font-size: .78rem;
-            line-height: 1.32;
+            align-items: center;
+            gap: .6rem;
+            margin: .32rem 0;
+            font-size: .84rem;
+            line-height: 1.34;
         }
 
         .score-stars {
             white-space: nowrap;
-            letter-spacing: .55px;
-            font-size: .82rem;
+            letter-spacing: .65px;
+            font-size: .9rem;
         }
 
         .hero-summary-grid {
             display: grid;
-            grid-template-columns: minmax(0, 2.25fr) minmax(300px, .85fr);
+            grid-template-columns: minmax(0, 2.05fr) minmax(330px, .95fr);
             gap: 1rem;
             align-items: stretch;
         }
@@ -254,7 +255,10 @@ st.markdown(
             box-sizing: border-box;
             min-width: 0;
             height: 100%;
-            padding: 1.15rem 1.25rem;
+            padding: 1.3rem 1.4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             background: rgba(127, 127, 127, .08);
             border: 1px solid rgba(127, 127, 127, .30);
             border-radius: 12px;
@@ -262,7 +266,7 @@ st.markdown(
         }
 
         .property-score-value {
-            font-size: 1.95rem;
+            font-size: 2.2rem;
             font-weight: 800;
             line-height: 1.08;
             letter-spacing: -.45px;
