@@ -306,8 +306,8 @@ st.markdown(
         }
 
         .section-label {
-            font-size: .69rem;
-            font-weight: 600;
+            font-size: .72rem;
+            font-weight: 650;
             letter-spacing: 1.1px;
             text-transform: uppercase;
             color: inherit;
@@ -700,6 +700,63 @@ st.markdown(
             color: #2f9e62 !important;
             box-shadow: 0 0 0 1px #2f9e62 !important;
             outline-color: #2f9e62 !important;
+        }
+
+        /* Light-mode readability: preserve hierarchy while improving contrast. */
+        html[data-theme="light"] .section-label,
+        html[data-theme="light"] .insight-title,
+        html[data-theme="light"] .revenue-stat-label,
+        html[data-theme="light"] .opportunity-rank,
+        body[data-theme="light"] .section-label,
+        body[data-theme="light"] .insight-title,
+        body[data-theme="light"] .revenue-stat-label,
+        body[data-theme="light"] .opportunity-rank {
+            color: #515b6a !important;
+            opacity: 1 !important;
+        }
+
+        html[data-theme="light"] div[data-testid="stCaptionContainer"],
+        html[data-theme="light"] div[data-testid="stCaptionContainer"] p,
+        body[data-theme="light"] div[data-testid="stCaptionContainer"],
+        body[data-theme="light"] div[data-testid="stCaptionContainer"] p {
+            color: #596474 !important;
+            opacity: 1 !important;
+        }
+
+        html[data-theme="light"] .js-plotly-plot .plotly .ytick text,
+        body[data-theme="light"] .js-plotly-plot .plotly .ytick text {
+            fill: #434d5c !important;
+            font-weight: 500 !important;
+        }
+
+        html[data-theme="light"] .js-plotly-plot .plotly .annotation-text,
+        body[data-theme="light"] .js-plotly-plot .plotly .annotation-text {
+            fill: #596474 !important;
+        }
+
+        @media (prefers-color-scheme: light) {
+            .section-label,
+            .insight-title,
+            .revenue-stat-label,
+            .opportunity-rank {
+                color: #515b6a !important;
+                opacity: 1 !important;
+            }
+
+            div[data-testid="stCaptionContainer"],
+            div[data-testid="stCaptionContainer"] p {
+                color: #596474 !important;
+                opacity: 1 !important;
+            }
+
+            .js-plotly-plot .plotly .ytick text {
+                fill: #434d5c !important;
+                font-weight: 500 !important;
+            }
+
+            .js-plotly-plot .plotly .annotation-text {
+                fill: #596474 !important;
+            }
         }
 
         @media (max-width: 760px) {
@@ -4235,7 +4292,7 @@ else:
             xanchor=xanchor,
             yanchor="middle",
             font=dict(
-                size=12,
+                size=13,
             ),
         )
 
@@ -4280,7 +4337,7 @@ else:
             showgrid=False,
             automargin=True,
             tickfont=dict(
-                size=12,
+                size=13,
             ),
         ),
         plot_bgcolor=(
