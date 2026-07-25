@@ -891,7 +891,6 @@ def build_data_backed_scores(
         "Listing Quality": listing_quality_percentile,
         "Performance Percentile": performance_percentile,
         "Overall": overall_score,
-        "Amenity Opportunity": 100.0 - amenities_percentile,
     }
 
 
@@ -3246,7 +3245,7 @@ st.markdown(
 
 st.caption(
     "Amenities are grouped exactly as they were during model training. "
-    "Property Readiness amenities are selected by default."
+    "Use Select all or Clear all within each group to speed up entry."
 )
 
 amenity_columns = st.columns(3, gap="medium")
@@ -3259,11 +3258,6 @@ for group_index, (
 ):
     group_title = pretty_label(
         group_feature
-    )
-
-    is_property_readiness = (
-        group_feature
-        == "AmenityGroup_Property_Readiness"
     )
 
     with amenity_columns[
@@ -3292,13 +3286,13 @@ for group_index, (
             if select_all_clicked:
                 for amenity in members:
                     st.session_state[
-                        f"amenity_{group_feature}_{amenity}"
+                        f"amenity_v2_{group_feature}_{amenity}"
                     ] = True
 
             if clear_all_clicked:
                 for amenity in members:
                     st.session_state[
-                        f"amenity_{group_feature}_{amenity}"
+                        f"amenity_v2_{group_feature}_{amenity}"
                     ] = False
 
             checkbox_cols = st.columns(2)
@@ -3307,7 +3301,7 @@ for group_index, (
                 members
             ):
                 amenity_key = (
-                    f"amenity_"
+                    f"amenity_v2_"
                     f"{group_feature}_"
                     f"{amenity}"
                 )
@@ -3317,7 +3311,7 @@ for group_index, (
                         amenity
                     ] = st.checkbox(
                         pretty_label(amenity),
-                        value=is_property_readiness,
+                        value=False,
                         key=amenity_key,
                     )
 
@@ -3636,40 +3630,21 @@ with summary_placeholder:
 
     performance_percentile = property_scores.get("Performance Percentile", 50.0)
     amenity_strength_score = property_scores.get("Amenities", 50.0)
-    amenity_opportunity_score = property_scores.get("Amenity Opportunity", 50.0)
     overall_property_score = property_scores.get("Overall", 50.0)
 
-    if amenity_opportunity_score <= 25:
-        amenity_opportunity_label = "Low"
-    elif amenity_opportunity_score <= 50:
-        amenity_opportunity_label = "Moderate"
-    elif amenity_opportunity_score <= 75:
-        amenity_opportunity_label = "High"
-    else:
-        amenity_opportunity_label = "Very high"
-
-    if top_amenity_action is not None:
-        amenity_detail = (
-            f'Amenity strength: {amenity_strength_score:.0f}/100 '
-            f'({percentile_label(amenity_strength_score)}). '
-            f'Top tested move: {escape(str(top_amenity_action["Title"]))} '
-            f'(+${top_amenity_action["Uplift"]:,.1f}/night).'
-        )
-    else:
-        amenity_detail = (
-            f'Amenity strength: {amenity_strength_score:.0f}/100 '
-            f'({percentile_label(amenity_strength_score)}). '
-            f'No positive one-step amenity change was identified.'
-        )
+    amenity_detail = (
+        f'Model-based amenity contribution versus '
+        f'{escape(reference_group_label)} (n={len(reference_group):,}).'
+    )
 
     score_rows = "".join(
-        f'<li><span>{escape(label)}</span>'
-        f'<span class="score-stars">{percentile_stars(property_scores.get(label, 50.0))}</span></li>'
-        for label in [
-            "Market",
-            "Amenities",
-            "Policies",
-            "Listing Quality",
+        f'<li><span>{escape(display_label)}</span>'
+        f'<span class="score-stars">{percentile_stars(property_scores.get(score_key, 50.0))}</span></li>'
+        for display_label, score_key in [
+            ("Market", "Market"),
+            ("Amenities", "Amenities"),
+            ("Policies", "Policies"),
+            ("Listing Setup", "Listing Quality"),
         ]
     )
 
@@ -3686,8 +3661,8 @@ with summary_placeholder:
         f'<div class="insight-detail">Predicted RevPAR versus actual historical performance among {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
         '</div>'
         '<div class="insight-card">'
-        '<div class="insight-title">Amenity improvement opportunity</div>'
-        f'<div class="insight-value insight-value-positive">{amenity_opportunity_label} · {amenity_opportunity_score:.0f} / 100</div>'
+        '<div class="insight-title">Amenity strength percentile</div>'
+        f'<div class="insight-value insight-value-positive">{amenity_strength_score:.0f}th</div>'
         f'<div class="insight-detail">{amenity_detail}</div>'
         '</div>'
         '<div class="insight-card">'
@@ -4194,11 +4169,11 @@ The displayed range is the **middle 50% out-of-sample prediction range**, calibr
 
 Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated symmetrically around the prediction in log space and transformed back to dollars. This creates the appropriate asymmetric dollar range. The annual range is the resulting lower and upper RevPAR bounds multiplied by 365.
 
-### How are the Property Score and amenity opportunity score calculated?
+### How are the Property Score and amenity strength percentile calculated?
 
-The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Quality are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
+The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Setup are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Internally, the validation export retains the original `Listing Quality` category name, but the interface labels it **Listing Setup** because it reflects capacity, photo count, and property type rather than subjective quality. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
 
-The overall Property Score is the simple average of those four category percentiles. The amenity card separates **amenity strength** from **remaining improvement opportunity**. Improvement opportunity is `100 - the current amenities percentile`, so a five-star amenity position correctly produces a low remaining-opportunity score. The dollar uplift shown with an amenity recommendation still comes from rerunning the fitted model one change at a time.
+The overall Property Score is the simple average of those four category percentiles. The amenity card shows the current listing's **amenity strength percentile** directly. Potential amenity improvements remain in the separate listing-improvements section, where each change is tested by rerunning the fitted model one input at a time.
 
 ### How can this tool help?
 
