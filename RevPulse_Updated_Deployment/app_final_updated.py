@@ -4287,7 +4287,6 @@ st.markdown(
 )
 
 st.caption(
-    "Each opportunity changes one input at a time and reruns the model. "
     "The estimates show predictive associations, not guaranteed causal gains."
 )
 
@@ -4355,14 +4354,6 @@ st.markdown(
     'Comparable Properties'
     '</div>',
     unsafe_allow_html=True,
-)
-
-st.caption(
-    "Historical listings are ranked using 65% similarity in the fitted "
-    "model's standardized feature space and 35% closeness of actual adjusted "
-    "TTM RevPAR to the current prediction. Listings with a missing core "
-    "property, capacity, location, photo-count, minimum-stay, or RevPAR field "
-    "are excluded before ranking."
 )
 
 comparables_df = load_comparables(
@@ -4549,6 +4540,10 @@ Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated sym
 The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Setup are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Internally, the validation export retains the original `Listing Quality` category name, but the interface labels it **Listing Setup** because it reflects capacity, photo count, and property type rather than subjective quality. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
 
 The overall Property Score is the simple average of those four category percentiles. The amenity card shows the current listing's **amenity strength percentile** directly. Potential amenity improvements remain in the separate listing-improvements section, where each change is tested by rerunning the fitted model one input at a time.
+
+### How are comparable properties selected?
+
+Historical listings are ranked using 65% similarity in the fitted model's standardized feature space and 35% closeness of actual adjusted TTM RevPAR to the current prediction. Listings with a missing core property, capacity, location, photo-count, minimum-stay, or RevPAR field are excluded before ranking.
 
 ### How can this tool help?
 
