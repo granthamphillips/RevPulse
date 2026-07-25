@@ -728,6 +728,41 @@ st.markdown(
                 min-height: 0;
             }
         }
+
+
+        /* Final amenity-checkbox override: force the selected icon to RevPulse green. */
+        div[data-testid="stCheckbox"] {
+            --primary-color: #2f9e62 !important;
+        }
+
+        div[data-testid="stCheckbox"] input[type="checkbox"] {
+            accent-color: #2f9e62 !important;
+        }
+
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"],
+        div[data-testid="stCheckbox"] [aria-checked="true"],
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) span:first-child,
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) span:first-child > div,
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) span:first-child > span,
+        div[data-testid="stCheckbox"] input[type="checkbox"]:checked + div,
+        div[data-testid="stCheckbox"] input[type="checkbox"]:checked + span,
+        div[data-testid="stCheckbox"] input[type="checkbox"]:checked ~ div:first-of-type {
+            background: #2f9e62 !important;
+            background-color: #2f9e62 !important;
+            border-color: #2f9e62 !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) svg,
+        div[data-testid="stCheckbox"] label:has(input[type="checkbox"]:checked) svg *,
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] svg,
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] svg * {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
+            background: transparent !important;
+        }
+
     </style>
     """,
     unsafe_allow_html=True,
