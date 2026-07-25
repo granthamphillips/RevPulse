@@ -107,7 +107,7 @@ st.markdown(
         }
 
         .block-container {
-            padding: 2rem 2.5rem;
+            padding: 1.35rem 2.5rem 2rem 2.5rem;
             max-width: 1240px;
         }
 
@@ -117,20 +117,22 @@ st.markdown(
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin: 0 auto 1.35rem auto;
+            position: relative;
+            top: 1rem;
+            margin: 0 auto -.45rem auto;
         }
 
         .brand-logo {
             display: block;
-            width: min(570px, 92vw);
+            width: min(500px, 88vw);
             max-width: 100%;
             height: auto;
             filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .14));
         }
 
         .brand-tagline {
-            margin-top: .22rem;
-            font-size: .98rem;
+            margin-top: .05rem;
+            font-size: .92rem;
             font-weight: 500;
             color: inherit;
             opacity: .72;
@@ -138,7 +140,7 @@ st.markdown(
         }
 
         .brand-parent {
-            margin-top: .35rem;
+            margin-top: .14rem;
             font-size: .7rem;
             font-weight: 650;
             letter-spacing: .8px;
@@ -151,15 +153,16 @@ st.markdown(
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: .9rem;
-            margin: 1rem 0 .1rem 0;
+            margin: .9rem 0 .1rem 0;
             align-items: stretch;
         }
 
         .insight-card {
             box-sizing: border-box;
             min-width: 0;
+            min-height: 144px;
             height: 100%;
-            padding: .95rem 1rem;
+            padding: .88rem .95rem;
             background: rgba(127, 127, 127, .08);
             color: inherit;
             border: 1px solid rgba(127, 127, 127, .28);
@@ -190,9 +193,21 @@ st.markdown(
             color: #2f9e62;
         }
 
+        .metric-low {
+            color: #d85b62 !important;
+        }
+
+        .metric-mid {
+            color: inherit !important;
+        }
+
+        .metric-high {
+            color: #2f9e62 !important;
+        }
+
         .insight-detail {
             font-size: .72rem;
-            line-height: 1.42;
+            line-height: 1.38;
             color: inherit;
             opacity: .70;
             margin-top: .38rem;
@@ -208,15 +223,70 @@ st.markdown(
         .score-list li {
             display: flex;
             justify-content: space-between;
-            gap: .45rem;
-            margin: .24rem 0;
-            font-size: .72rem;
-            line-height: 1.3;
+            align-items: center;
+            gap: .6rem;
+            margin: .32rem 0;
+            font-size: .84rem;
+            line-height: 1.34;
         }
 
         .score-stars {
             white-space: nowrap;
-            letter-spacing: .45px;
+            letter-spacing: .65px;
+            font-size: .9rem;
+        }
+
+        .hero-summary-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2.05fr) minmax(330px, .95fr);
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .hero-summary-grid > * {
+            height: 100%;
+        }
+
+        .revenue-primary {
+            min-width: 0;
+        }
+
+        .property-score-panel {
+            box-sizing: border-box;
+            min-width: 0;
+            height: 100%;
+            padding: 1.3rem 1.4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(127, 127, 127, .08);
+            border: 1px solid rgba(127, 127, 127, .30);
+            border-radius: 12px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .08);
+        }
+
+        .property-score-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -.45px;
+            color: inherit;
+        }
+
+        .property-score-note {
+            font-size: .66rem;
+            line-height: 1.35;
+            color: inherit;
+            opacity: .62;
+            margin-top: .55rem;
+        }
+
+        .prediction-delta {
+            margin-top: .42rem;
+            font-size: .72rem;
+            line-height: 1.35;
+            color: inherit;
+            opacity: .72;
         }
 
         div[data-testid="stExpander"] details {
@@ -272,7 +342,8 @@ st.markdown(
 
         .revenue-card {
             box-sizing: border-box;
-            padding: 1.15rem 1.2rem;
+            height: 100%;
+            padding: 1.2rem 1.25rem;
             background:
                 linear-gradient(
                     135deg,
@@ -296,7 +367,7 @@ st.markdown(
         }
 
         .revenue-main {
-            font-size: 2rem;
+            font-size: 2.18rem;
             font-weight: 800;
             line-height: 1.05;
             letter-spacing: -.5px;
@@ -361,11 +432,11 @@ st.markdown(
         .rule {
             border: none;
             border-top: 1px solid rgba(127, 127, 127, .28);
-            margin: 1.35rem 0;
+            margin: .8rem 0 .9rem 0;
         }
 
         .summary-bottom-space {
-            height: 1.35rem;
+            height: .65rem;
         }
 
         div[data-testid="stCheckbox"] label {
@@ -465,6 +536,10 @@ st.markdown(
             .block-container {
                 padding-left: 1rem;
                 padding-right: 1rem;
+            }
+
+            .hero-summary-grid {
+                grid-template-columns: 1fr;
             }
 
             .revenue-grid {
@@ -891,7 +966,6 @@ def build_data_backed_scores(
         "Listing Quality": listing_quality_percentile,
         "Performance Percentile": performance_percentile,
         "Overall": overall_score,
-        "Amenity Opportunity": 100.0 - amenities_percentile,
     }
 
 
@@ -3093,6 +3167,11 @@ summary_placeholder = st.container()
 # INPUTS
 # ============================================================
 
+st.markdown(
+    '<div class="section-label">Listing details</div>',
+    unsafe_allow_html=True,
+)
+
 with st.expander(
     "Market and property",
     expanded=False,
@@ -3246,7 +3325,7 @@ st.markdown(
 
 st.caption(
     "Amenities are grouped exactly as they were during model training. "
-    "Property Readiness amenities are selected by default."
+    "Use Select all or Clear all within each group to speed up entry."
 )
 
 amenity_columns = st.columns(3, gap="medium")
@@ -3259,11 +3338,6 @@ for group_index, (
 ):
     group_title = pretty_label(
         group_feature
-    )
-
-    is_property_readiness = (
-        group_feature
-        == "AmenityGroup_Property_Readiness"
     )
 
     with amenity_columns[
@@ -3292,13 +3366,13 @@ for group_index, (
             if select_all_clicked:
                 for amenity in members:
                     st.session_state[
-                        f"amenity_{group_feature}_{amenity}"
+                        f"amenity_v2_{group_feature}_{amenity}"
                     ] = True
 
             if clear_all_clicked:
                 for amenity in members:
                     st.session_state[
-                        f"amenity_{group_feature}_{amenity}"
+                        f"amenity_v2_{group_feature}_{amenity}"
                     ] = False
 
             checkbox_cols = st.columns(2)
@@ -3307,7 +3381,7 @@ for group_index, (
                 members
             ):
                 amenity_key = (
-                    f"amenity_"
+                    f"amenity_v2_"
                     f"{group_feature}_"
                     f"{amenity}"
                 )
@@ -3317,7 +3391,7 @@ for group_index, (
                         amenity
                     ] = st.checkbox(
                         pretty_label(amenity),
-                        value=is_property_readiness,
+                        value=False,
                         key=amenity_key,
                     )
 
@@ -3553,68 +3627,6 @@ with summary_placeholder:
     monthly_revenue = annualized_revenue / 12
     city_median_annualized_revenue = selected_city_median * 365
 
-    summary_left, summary_right = st.columns(
-        [1.28, 0.72],
-        gap="large",
-        vertical_alignment="center",
-    )
-
-    with summary_left:
-        revenue_card_html = (
-            f'<div class="revenue-card">'
-            f'<div class="revenue-eyebrow">Annualized revenue potential</div>'
-            f'<div class="revenue-main">${annualized_revenue:,.0f}</div>'
-            f'<div class="revenue-sub">Adjusted RevPAR × 365 available nights</div>'
-            f'<div class="revenue-grid">'
-            f'<div class="revenue-stat">'
-            f'<div class="revenue-stat-value">${monthly_revenue:,.0f}</div>'
-            f'<div class="revenue-stat-label">Monthly equivalent</div>'
-            f'</div>'
-            f'<div class="revenue-stat">'
-            f'<div class="revenue-stat-value">${city_median_annualized_revenue:,.0f}</div>'
-            f'<div class="revenue-stat-label">{selected_city_label} median annualized</div>'
-            f'</div>'
-            f'</div>'
-            f'<div class="revenue-context">'
-            f'{pretty_label(selected_property)} in {pretty_label(selected_city)} · '
-            f'occupancy-adjusted estimate, not gross booking revenue'
-            f'</div>'
-            f'</div>'
-        )
-
-        st.markdown(
-            revenue_card_html,
-            unsafe_allow_html=True,
-        )
-
-    with summary_right:
-        st.markdown(
-            '<div class="section-label">Prediction</div>',
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            f'<div class="hero-value">${revpar:,.0f}</div>',
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            '<div class="hero-label">Predicted adjusted RevPAR per night</div>',
-            unsafe_allow_html=True,
-        )
-
-        direction = "above" if difference >= 0 else "below"
-        sign = "+" if difference >= 0 else "-"
-
-        st.markdown(
-            f'<div class="hero-context">'
-            f'{sign}${abs(difference):,.0f} '
-            f'({sign}{abs(difference_pct):.0f}%) '
-            f'{direction} the {selected_city_label} median'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
     if prediction_range is not None:
         (
             lower_revpar,
@@ -3626,75 +3638,105 @@ with summary_placeholder:
         upper_annual = upper_revpar * 365
         interval_value = f'${lower_annual:,.0f} – ${upper_annual:,.0f}'
         interval_detail = (
-            f'Middle 50% out-of-sample predicted range · '
-            f'{empirical_coverage * 100:.1f}% observed calibration coverage '
-            f'across {interval_sample_size:,} validation rows.'
+            f'Typical middle-50% range from '
+            f'{interval_sample_size:,} out-of-sample validation predictions.'
         )
     else:
         interval_value = 'Unavailable'
-        interval_detail = 'No compatible 50% validation calibration row was found for this market.'
+        interval_detail = 'No compatible validation range was found for this market.'
 
     performance_percentile = property_scores.get("Performance Percentile", 50.0)
     amenity_strength_score = property_scores.get("Amenities", 50.0)
-    amenity_opportunity_score = property_scores.get("Amenity Opportunity", 50.0)
     overall_property_score = property_scores.get("Overall", 50.0)
 
-    if amenity_opportunity_score <= 25:
-        amenity_opportunity_label = "Low"
-    elif amenity_opportunity_score <= 50:
-        amenity_opportunity_label = "Moderate"
-    elif amenity_opportunity_score <= 75:
-        amenity_opportunity_label = "High"
-    else:
-        amenity_opportunity_label = "Very high"
+    direction = "above" if difference >= 0 else "below"
+    sign = "+" if difference >= 0 else "-"
 
-    if top_amenity_action is not None:
-        amenity_detail = (
-            f'Amenity strength: {amenity_strength_score:.0f}/100 '
-            f'({percentile_label(amenity_strength_score)}). '
-            f'Top tested move: {escape(str(top_amenity_action["Title"]))} '
-            f'(+${top_amenity_action["Uplift"]:,.1f}/night).'
-        )
-    else:
-        amenity_detail = (
-            f'Amenity strength: {amenity_strength_score:.0f}/100 '
-            f'({percentile_label(amenity_strength_score)}). '
-            f'No positive one-step amenity change was identified.'
-        )
+    def compact_percentile_display(value: float) -> str:
+        if value < 1.0:
+            return "Below 1st percentile"
+        return percentile_label(value)
+
+    def metric_color_class(value: float) -> str:
+        if value < 25.0:
+            return "metric-low"
+        if value >= 75.0:
+            return "metric-high"
+        return "metric-mid"
+
+    market_color_class = metric_color_class(performance_percentile)
+    amenity_color_class = metric_color_class(amenity_strength_score)
+    property_score_color_class = metric_color_class(overall_property_score)
 
     score_rows = "".join(
-        f'<li><span>{escape(label)}</span>'
-        f'<span class="score-stars">{percentile_stars(property_scores.get(label, 50.0))}</span></li>'
-        for label in [
-            "Market",
-            "Amenities",
-            "Policies",
-            "Listing Quality",
+        f'<li><span>{escape(display_label)}</span>'
+        f'<span class="score-stars">{percentile_stars(property_scores.get(score_key, 50.0))}</span></li>'
+        for display_label, score_key in [
+            ("Market", "Market"),
+            ("Amenities", "Amenities"),
+            ("Policies", "Policies"),
+            ("Listing Setup", "Listing Quality"),
         ]
+    )
+
+    revenue_card_html = (
+        '<div class="hero-summary-grid">'
+        '<div class="revenue-card">'
+        '<div class="revenue-primary">'
+        '<div class="revenue-eyebrow">Annualized revenue potential</div>'
+        f'<div class="revenue-main">${annualized_revenue:,.0f}</div>'
+        '<div class="revenue-sub">Adjusted RevPAR × 365 available nights</div>'
+        '<div class="revenue-grid">'
+        '<div class="revenue-stat">'
+        f'<div class="revenue-stat-value">${monthly_revenue:,.0f}</div>'
+        '<div class="revenue-stat-label">Monthly equivalent</div>'
+        '</div>'
+        '<div class="revenue-stat">'
+        f'<div class="revenue-stat-value">${city_median_annualized_revenue:,.0f}</div>'
+        f'<div class="revenue-stat-label">{selected_city_label} median annualized</div>'
+        '</div>'
+        '</div>'
+        '<div class="revenue-context">'
+        f'{pretty_label(selected_property)} in {pretty_label(selected_city)} · '
+        'occupancy-adjusted estimate, not gross booking revenue'
+        '</div>'
+        '</div>'
+        '</div>'
+        '<div class="property-score-panel">'
+        '<div class="insight-title">Property score</div>'
+        f'<div class="property-score-value {property_score_color_class}">{overall_property_score:.0f} / 100</div>'
+        f'<ul class="score-list">{score_rows}</ul>'
+        '</div>'
+        '</div>'
+    )
+
+    st.markdown(
+        revenue_card_html,
+        unsafe_allow_html=True,
     )
 
     insight_cards_html = (
         '<div class="insight-grid">'
         '<div class="insight-card">'
+        '<div class="insight-title">Predicted adjusted RevPAR</div>'
+        f'<div class="insight-value {market_color_class}">${revpar:,.0f} / night</div>'
+        f'<div class="prediction-delta">{sign}${abs(difference):,.0f} '
+        f'({sign}{abs(difference_pct):.0f}%) {direction} the {selected_city_label} median.</div>'
+        '</div>'
+        '<div class="insight-card">'
         '<div class="insight-title">Typical revenue range</div>'
-        f'<div class="insight-value">{interval_value}</div>'
+        f'<div class="insight-value {market_color_class}">{interval_value}</div>'
         f'<div class="insight-detail">{escape(interval_detail)}</div>'
         '</div>'
         '<div class="insight-card">'
         '<div class="insight-title">Market percentile</div>'
-        f'<div class="insight-value insight-value-positive">{performance_percentile:.0f}th</div>'
-        f'<div class="insight-detail">Predicted RevPAR versus actual historical performance among {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
+        f'<div class="insight-value {market_color_class}">{compact_percentile_display(performance_percentile)}</div>'
+        f'<div class="insight-detail">Performance relative to {escape(reference_group_label)}.</div>'
         '</div>'
         '<div class="insight-card">'
-        '<div class="insight-title">Amenity improvement opportunity</div>'
-        f'<div class="insight-value insight-value-positive">{amenity_opportunity_label} · {amenity_opportunity_score:.0f} / 100</div>'
-        f'<div class="insight-detail">{amenity_detail}</div>'
-        '</div>'
-        '<div class="insight-card">'
-        '<div class="insight-title">Property score</div>'
-        f'<div class="insight-value">{overall_property_score:.0f} / 100</div>'
-        f'<ul class="score-list">{score_rows}</ul>'
-        f'<div class="insight-detail">Average of four empirical category percentiles.</div>'
+        '<div class="insight-title">Amenity strength percentile</div>'
+        f'<div class="insight-value {amenity_color_class}">{compact_percentile_display(amenity_strength_score)}</div>'
+        f'<div class="insight-detail">Amenity contribution relative to {escape(reference_group_label)}.</div>'
         '</div>'
         '</div>'
     )
@@ -4194,11 +4236,11 @@ The displayed range is the **middle 50% out-of-sample prediction range**, calibr
 
 Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated symmetrically around the prediction in log space and transformed back to dollars. This creates the appropriate asymmetric dollar range. The annual range is the resulting lower and upper RevPAR bounds multiplied by 365.
 
-### How are the Property Score and amenity opportunity score calculated?
+### How are the Property Score and amenity strength percentile calculated?
 
-The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Quality are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
+The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Setup are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Internally, the validation export retains the original `Listing Quality` category name, but the interface labels it **Listing Setup** because it reflects capacity, photo count, and property type rather than subjective quality. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
 
-The overall Property Score is the simple average of those four category percentiles. The amenity card separates **amenity strength** from **remaining improvement opportunity**. Improvement opportunity is `100 - the current amenities percentile`, so a five-star amenity position correctly produces a low remaining-opportunity score. The dollar uplift shown with an amenity recommendation still comes from rerunning the fitted model one change at a time.
+The overall Property Score is the simple average of those four category percentiles. The amenity card shows the current listing's **amenity strength percentile** directly. Potential amenity improvements remain in the separate listing-improvements section, where each change is tested by rerunning the fitted model one input at a time.
 
 ### How can this tool help?
 
