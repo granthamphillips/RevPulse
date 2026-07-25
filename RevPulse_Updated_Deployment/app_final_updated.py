@@ -315,6 +315,68 @@ st.markdown(
             margin: 1.3rem 0 .55rem 0;
         }
 
+
+        .factor-toggle-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: .25rem;
+        }
+
+        div[data-testid="stSegmentedControl"] {
+            width: 100%;
+        }
+
+        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] {
+            justify-content: center;
+            gap: 0;
+            border: 1px solid rgba(127, 127, 127, .30);
+            border-radius: 999px;
+            padding: 4px;
+            background: rgba(127, 127, 127, .045);
+        }
+
+        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button {
+            border-radius: 999px !important;
+            border: none !important;
+            color: rgba(255,255,255,.78) !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            min-width: 132px;
+            font-weight: 600;
+        }
+
+        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button[aria-pressed="true"] {
+            background: rgba(47, 158, 98, .16) !important;
+            color: #2f9e62 !important;
+            box-shadow: inset 0 0 0 1px rgba(47, 158, 98, .65) !important;
+        }
+
+        div[data-testid="stSegmentedControl"] [data-baseweb="button-group"] button:hover {
+            color: #f2f4f8 !important;
+        }
+
+        div[data-testid="stRadio"] > div {
+            display: flex;
+            justify-content: center;
+        }
+
+        div[data-testid="stRadio"] label {
+            border: 1px solid rgba(127, 127, 127, .30);
+            border-radius: 999px;
+            padding: .35rem .85rem;
+            background: rgba(127, 127, 127, .045);
+        }
+
+        div[data-testid="stRadio"] label:has(input:checked) {
+            background: rgba(47, 158, 98, .16);
+            border-color: rgba(47, 158, 98, .65);
+        }
+
+        div[data-testid="stRadio"] label:has(input:checked) p {
+            color: #2f9e62 !important;
+            font-weight: 600;
+        }
+
         .hero-value {
             font-size: 3.25rem;
             font-weight: 800;
@@ -3796,18 +3858,24 @@ st.markdown(
 
 factor_display_mode = st.session_state.get(
     "factor_display_mode",
-    "All factors",
+    "Key Factors",
 )
 
 # Preserve the user's selection across upgrades from the earlier labels.
 if factor_display_mode == "Full":
-    factor_display_mode = "All factors"
+    factor_display_mode = "All Factors"
     st.session_state["factor_display_mode"] = factor_display_mode
 elif factor_display_mode == "Compact":
-    factor_display_mode = "Key factors"
+    factor_display_mode = "Key Factors"
+    st.session_state["factor_display_mode"] = factor_display_mode
+elif factor_display_mode == "All Factors":
+    factor_display_mode = "All Factors"
+    st.session_state["factor_display_mode"] = factor_display_mode
+elif factor_display_mode == "Key Factors":
+    factor_display_mode = "Key Factors"
     st.session_state["factor_display_mode"] = factor_display_mode
 
-if factor_display_mode == "Key factors":
+if factor_display_mode == "Key Factors":
     positive_factors = (
         contribution_df.loc[
             contribution_df["Contribution"] > 0
@@ -3976,7 +4044,7 @@ else:
                 320,
                 len(chart_df) * 46,
             )
-            if factor_display_mode == "Key factors"
+            if factor_display_mode == "Key Factors"
             else max(
                 500,
                 len(chart_df) * 38,
@@ -4030,31 +4098,33 @@ st.caption(
 )
 
 display_toggle_help = (
-    "All factors shows the 15 largest absolute factors. "
-    "Key factors shows the three strongest positive and "
+    "All Factors shows the 15 largest absolute factors. "
+    "Key Factors shows the three strongest positive and "
     "three strongest negative factors."
 )
 
 # Prefer a pill-style segmented toggle when available.
 if "factor_display_mode" not in st.session_state:
-    st.session_state["factor_display_mode"] = factor_display_mode
+    st.session_state["factor_display_mode"] = "Key Factors"
 
-if hasattr(st, "segmented_control"):
-    st.segmented_control(
-        "Display",
-        options=["All factors", "Key factors"],
-        selection_mode="single",
-        key="factor_display_mode",
-        help=display_toggle_help,
-    )
-else:
-    st.radio(
-        "Display",
-        options=["All factors", "Key factors"],
-        horizontal=True,
-        key="factor_display_mode",
-        help=display_toggle_help,
-    )
+toggle_left, toggle_center, toggle_right = st.columns([1, 1.2, 1])
+with toggle_center:
+    if hasattr(st, "segmented_control"):
+        st.segmented_control(
+            "Display",
+            options=["All Factors", "Key Factors"],
+            selection_mode="single",
+            key="factor_display_mode",
+            help=display_toggle_help,
+        )
+    else:
+        st.radio(
+            "Display",
+            options=["All Factors", "Key Factors"],
+            horizontal=True,
+            key="factor_display_mode",
+            help=display_toggle_help,
+        )
 
 
 # ============================================================
