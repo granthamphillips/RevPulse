@@ -3019,7 +3019,7 @@ if logo_data_uri:
             <div class="brand-tagline">
                 Your pulse on the short-term rental market.
             </div>
-            <div class="brand-parent">Powered by AirROI · build 8.2</div>
+            <div class="brand-parent">Powered by AirROI</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -3032,7 +3032,7 @@ else:
             <div class="brand-tagline">
                 Your pulse on the short-term rental market.
             </div>
-            <div class="brand-parent">Powered by AirROI · build 8.2</div>
+            <div class="brand-parent">Powered by AirROI</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -3463,7 +3463,7 @@ interval_row = select_interval_row(
 prediction_range = conformal_prediction_range(
     predicted_revpar=revpar,
     interval_row=interval_row,
-    coverage=80,
+    coverage=50,
 )
 
 category_contributions = current_category_contributions(
@@ -3579,7 +3579,7 @@ with summary_placeholder:
         upper_annual = upper_revpar * 365
         interval_value = f'${lower_annual:,.0f} – ${upper_annual:,.0f}'
         interval_detail = (
-            f'80% out-of-sample predicted range · '
+            f'Middle 50% out-of-sample predicted range · '
             f'{empirical_coverage * 100:.1f}% observed calibration coverage '
             f'across {interval_sample_size:,} validation rows.'
         )
@@ -3588,18 +3588,30 @@ with summary_placeholder:
         interval_detail = 'Add the RevPulse validation export files to calculate this range.'
 
     performance_percentile = property_scores.get("Performance Percentile", 50.0)
+    amenity_strength_score = property_scores.get("Amenities", 50.0)
     amenity_opportunity_score = property_scores.get("Amenity Opportunity", 50.0)
     overall_property_score = property_scores.get("Overall", 50.0)
 
+    if amenity_opportunity_score <= 25:
+        amenity_opportunity_label = "Low"
+    elif amenity_opportunity_score <= 50:
+        amenity_opportunity_label = "Moderate"
+    elif amenity_opportunity_score <= 75:
+        amenity_opportunity_label = "High"
+    else:
+        amenity_opportunity_label = "Very high"
+
     if top_amenity_action is not None:
         amenity_detail = (
-            f'{percentile_label(property_scores.get("Amenities", 50.0))} amenity position. '
+            f'Amenity strength: {amenity_strength_score:.0f}/100 '
+            f'({percentile_label(amenity_strength_score)}). '
             f'Top tested move: {escape(str(top_amenity_action["Title"]))} '
             f'(+${top_amenity_action["Uplift"]:,.1f}/night).'
         )
     else:
         amenity_detail = (
-            f'{percentile_label(property_scores.get("Amenities", 50.0))} amenity position. '
+            f'Amenity strength: {amenity_strength_score:.0f}/100 '
+            f'({percentile_label(amenity_strength_score)}). '
             f'No positive one-step amenity change was identified.'
         )
 
@@ -3617,7 +3629,7 @@ with summary_placeholder:
     insight_cards_html = (
         '<div class="insight-grid">'
         '<div class="insight-card">'
-        '<div class="insight-title">Revenue prediction range</div>'
+        '<div class="insight-title">Typical revenue range</div>'
         f'<div class="insight-value">{interval_value}</div>'
         f'<div class="insight-detail">{escape(interval_detail)}</div>'
         '</div>'
@@ -3627,8 +3639,8 @@ with summary_placeholder:
         f'<div class="insight-detail">Predicted RevPAR versus actual historical performance among {escape(reference_group_label)} (n={len(reference_group):,}).</div>'
         '</div>'
         '<div class="insight-card">'
-        '<div class="insight-title">Amenity opportunity score</div>'
-        f'<div class="insight-value insight-value-positive">{amenity_opportunity_score:.0f} / 100</div>'
+        '<div class="insight-title">Amenity improvement opportunity</div>'
+        f'<div class="insight-value insight-value-positive">{amenity_opportunity_label} · {amenity_opportunity_score:.0f} / 100</div>'
         f'<div class="insight-detail">{amenity_detail}</div>'
         '</div>'
         '<div class="insight-card">'
@@ -4131,7 +4143,7 @@ Its transparent structure allows the app to explain individual predictions and e
 
 ### How is the revenue prediction range calculated?
 
-The displayed range is an **80% out-of-sample prediction interval**, not a hand-selected confidence band. It is calibrated from nested five-fold cross-validation errors on 2,128 historical listings. The app uses the most specific reliable calibration group available: selected city and property type when there are at least 30 validation rows, then city, then the global validation sample.
+The displayed range is the **middle 50% out-of-sample prediction range**, calibrated from nested five-fold cross-validation errors on 2,128 historical listings. It is intentionally presented as a typical range rather than a broad high-coverage interval. The app uses the most specific reliable calibration group available: selected city and property type when there are at least 30 validation rows, then city, then the global validation sample.
 
 Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated symmetrically around the prediction in log space and transformed back to dollars. This creates the appropriate asymmetric dollar range. The annual range is the resulting lower and upper RevPAR bounds multiplied by 365.
 
@@ -4139,7 +4151,7 @@ Because the Elastic Net predicts `log1p(RevPAR)`, the interval is calculated sym
 
 The Property Score is based on empirical percentiles rather than hand-assigned quality rules. Amenities, Policies, and Listing Quality are calculated by summing the current listing's fitted model contributions in each category and comparing them with historical listings in the closest available city/property reference group. Market reflects how the selected city's median adjusted RevPAR ranks across the ten modeled markets.
 
-The overall Property Score is the simple average of those four category percentiles. The amenity opportunity score is `100 - the current amenities percentile`, so a higher score means the listing's amenity contribution has more room to improve relative to comparable historical properties. The dollar uplift shown with an amenity recommendation still comes from rerunning the fitted model one change at a time.
+The overall Property Score is the simple average of those four category percentiles. The amenity card separates **amenity strength** from **remaining improvement opportunity**. Improvement opportunity is `100 - the current amenities percentile`, so a five-star amenity position correctly produces a low remaining-opportunity score. The dollar uplift shown with an amenity recommendation still comes from rerunning the fitted model one change at a time.
 
 ### How can this tool help?
 
@@ -4181,7 +4193,6 @@ st.caption(
 st.markdown(
     f"""
     <div class="footer">
-        RevPulse build 8.2 &nbsp;|&nbsp;
         Elastic Net alpha: {bundle["model"].alpha_:.5f}
         &nbsp;|&nbsp; L1 ratio: {bundle["model"].l1_ratio_:.2f}
         &nbsp;|&nbsp; {len(bundle["feature_names"])} predictors
