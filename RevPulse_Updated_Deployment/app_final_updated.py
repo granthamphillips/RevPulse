@@ -792,9 +792,15 @@ st.markdown(
         .mobile-factor-impact {
             flex: 0 0 auto;
             font-size: .95rem;
-            font-weight: 800;
+            font-weight: 700;
             line-height: 1.32;
             white-space: nowrap;
+        }
+
+        .mobile-factor-impact-major {
+            font-size: 1.02rem;
+            font-weight: 900;
+            letter-spacing: -.1px;
         }
 
         .mobile-factor-impact-positive {
@@ -4444,10 +4450,15 @@ else:
             if float(row["Contribution"]) >= 0
             else "mobile-factor-impact-negative"
         )
+        magnitude_class = (
+            " mobile-factor-impact-major"
+            if float(row["Percent impact"]) >= 10.0
+            else ""
+        )
         mobile_factor_rows.append(
             '<div class="mobile-factor-row">'
             f'<div class="mobile-factor-label">{escape(str(row["Label"]))}</div>'
-            f'<div class="mobile-factor-impact {impact_class}">'
+            f'<div class="mobile-factor-impact {impact_class}{magnitude_class}">'
             f'{escape(str(row["Display impact"]))}'
             '</div>'
             '</div>'
