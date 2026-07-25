@@ -1,0 +1,6 @@
+Deploy the files in this folder at the ROOT of the Streamlit repository.
+
+Recommended Streamlit entrypoint: app.py
+
+The app.py and app_final_updated.py files are identical so either existing entrypoint works.
+The page footer should display "RevPulse build 8.1" after the new deployment is live.
