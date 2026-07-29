@@ -2159,16 +2159,16 @@ def build_comparable_map(
             """
             <style>
                 .leaflet-container {
-                    background: #e8f1e6;
+                    background: #dcebdd;
                 }
 
                 .leaflet-tile-pane {
                     filter:
-                        sepia(18%)
-                        saturate(125%)
+                        sepia(14%)
+                        saturate(118%)
                         hue-rotate(62deg)
-                        brightness(1.03)
-                        contrast(.94);
+                        brightness(.94)
+                        contrast(1.14);
                 }
             </style>
             """
@@ -3585,10 +3585,16 @@ with st.expander(
     market_cols = st.columns(4, gap="medium")
 
     city_options = list(bundle["city_options"])
+    default_city_index = (
+        city_options.index("raleigh")
+        if "raleigh" in city_options
+        else 0
+    )
     with market_cols[0]:
         selected_city = st.selectbox(
             "City",
             options=city_options,
+            index=default_city_index,
             format_func=categorical_label,
         )
 
@@ -4683,9 +4689,9 @@ else:
                 "Rank": comparable_rows[
                     "Rank"
                 ].astype(int),
-                "Property category": comparable_rows[
-                    "Property group"
-                ].map(pretty_label),
+                "Listing ID": comparable_rows[
+                    "listing_id"
+                ].map(listing_identifier),
                 "Actual adjusted RevPAR": comparable_rows[
                     "ttm_adjusted_revpar"
                 ],
