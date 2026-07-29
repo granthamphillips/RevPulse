@@ -2159,16 +2159,16 @@ def build_comparable_map(
             """
             <style>
                 .leaflet-container {
-                    background: #dcebdd;
+                    background: #bfd8c3;
                 }
 
                 .leaflet-tile-pane {
                     filter:
-                        sepia(14%)
-                        saturate(118%)
-                        hue-rotate(62deg)
-                        brightness(.94)
-                        contrast(1.14);
+                        sepia(20%)
+                        saturate(135%)
+                        hue-rotate(64deg)
+                        brightness(.84)
+                        contrast(1.30);
                 }
             </style>
             """
