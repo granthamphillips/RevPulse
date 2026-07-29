@@ -1,2 +1,14 @@
-[theme]
+[client]
+toolbarMode = "auto"
+
+[theme.light]
 primaryColor = "#2f9e62"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f7f5"
+textColor = "#17211b"
+
+[theme.dark]
+primaryColor = "#55b97a"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1a211e"
+textColor = "#fafafa"
