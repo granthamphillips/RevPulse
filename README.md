@@ -10,6 +10,27 @@ RevPulse is a **Streamlit analytics application** designed to help explore short
 - Presenting results with interactive tables, charts, and map-based views
 - Incorporating calibration/reference datasets into the interface
 
+## Application Preview
+
+### Revenue Prediction Dashboard
+
+RevPulse estimates annualized rental revenue potential and presents a property score, a typical revenue range, and comparisons with the local market.
+
+![RevPulse revenue prediction dashboard](images/dashboard.png)
+
+### Prediction Drivers
+
+The application highlights the features associated with higher or lower predicted adjusted revenue per available night (RevPAR), providing context for its estimates.
+
+![RevPulse model prediction factors](images/prediction_factors.png)
+
+### Potential Listing Improvements
+
+RevPulse presents model-based estimates for changes to listing settings, making the prediction easier to translate into practical decisions. These are **predictive associations, not guaranteed causal gains**.
+
+![RevPulse potential listing improvements](images/recommendations.png)
+
+
 ## Technology
 
 Python, Pandas, NumPy, Scikit-learn, Streamlit, Plotly, Folium, and Streamlit-Folium.
